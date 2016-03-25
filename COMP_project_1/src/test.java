@@ -1,8 +1,12 @@
-public class HelloWorld {
+public class test {
 
     public static void main(String[] args) {
-        // Prints "Hello, World" to the terminal window.
         System.out.println("Hello, World");
     }
 
+    int pointlessfunction(int a){
+    	int c = 0;
+    	char b = 'b';
+    	return a+=2;
+    }
 }
