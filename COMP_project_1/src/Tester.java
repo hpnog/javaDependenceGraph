@@ -22,20 +22,30 @@ public class Tester {
 		} finally {
 		    in.close();
 		}
-
         // visit method nodes and print the methods names
-        new MethodVisitor().visit(cu, null);
+       // new MethodVisitor().visit(cu, null);
         // visit expressions,variabledeclarationexpr and variabledeclarators nodes
         //print the above nodes using toString() 
-        new MyVisitor().visit(cu,null);
-    }
+        //new MyVisitor().visit(cu,null);
+    
+		new MethodVisitor().processNode(cu);
+	}
+	
 }
 
     /**
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
     class MethodVisitor extends VoidVisitorAdapter {
-
+    	void processNode(Node child2){
+    		
+    		System.out.println(child2.getClass()+ "\n" + child2.toString());
+    		System.out.println("--------------------------------");
+    		
+    		for(Node child: child2.getChildrenNodes()){
+    			processNode(child);
+    		}
+    	}
         @Override
         public void visit(MethodDeclaration n, Object arg) {
             // here you can access the attributes of the method.

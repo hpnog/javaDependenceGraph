@@ -4,7 +4,7 @@ public class test {
         System.out.println("Hello, World");
     }
 
-    int pointlessfunction(int a){
+    private int pointlessfunction(int a){
     	int c = 0;
     	char b = 'b';
     	return a+=2;
