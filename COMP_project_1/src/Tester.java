@@ -28,7 +28,7 @@ public class Tester {
         //print the above nodes using toString() 
         //new MyVisitor().visit(cu,null);
     
-		new MethodVisitor().processNode(cu);
+		new MethodVisitor().processNode(cu, "|");
 	}
 	
 }
@@ -37,21 +37,35 @@ public class Tester {
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
     class MethodVisitor extends VoidVisitorAdapter {
-    	void processNode(Node child2){
+    	void processNode(Node child2, String treeSeparator){
     		
-    		System.out.println(child2.getClass()+ "\n" + child2.toString());
-    		System.out.println("--------------------------------");
+    		String elem = child2.toString();
+    		
+    		System.out.println(treeSeparator + child2.getClass()+ "\n" + getStringToPrint(elem, treeSeparator));
     		
     		for(Node child: child2.getChildrenNodes()){
-    			processNode(child);
+    			processNode(child, treeSeparator + "    |");
     		}
     	}
-        @Override
+        
+    	private String getStringToPrint(String elem, String treeSeparator) {
+			String temp = treeSeparator;
+			for(int i = 0; i < elem.length(); i++) {
+				if(elem.charAt(i) == '\n')
+					temp += elem.charAt(i) + treeSeparator;
+				else	
+					temp += elem.charAt(i);
+			}
+			return temp;
+		}
+		@Override
         public void visit(MethodDeclaration n, Object arg) {
             // here you can access the attributes of the method.
             // this method will be called for all methods in this 
             // CompilationUnit, including inner class methods
-            System.out.println(n.getName());
+           
+        	//System.out.println(n.getName());
+            
             super.visit(n, arg);
         }
     }
