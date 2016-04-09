@@ -1,0 +1,147 @@
+2016-04-09 01:09:25,976 [Worker-10] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: COMP_project_1:COMP_project_1:0.0.1-SNAPSHOT @ C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\pom.xml.
+2016-04-09 01:09:27,830 [Worker-10] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:09:27,832 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:09:29,648 [Worker-4] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: COMP_project_1:COMP_project_1:0.0.1-SNAPSHOT @ C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\pom.xml.
+2016-04-09 01:09:29,649 [Worker-10] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:09:29,650 [Worker-10] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:09:30,853 [Worker-1] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:09:30,855 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:09:30,857 [Worker-1] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:09:30,858 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:10:27,513 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:10:27,514 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:10:27,516 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:10:27,518 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:10:34,905 [main] INFO  c.g.t.t.d.PublishedGradleVersions - Gradle version information cache file is not out-of-date. No remote download required.
+2016-04-09 01:11:36,919 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:11:36,920 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:11:36,921 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:11:36,922 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:12:46,888 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:12:46,889 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:12:46,891 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:12:46,892 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:13:07,836 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:13:07,837 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:13:07,838 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:13:07,840 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:13:31,665 [Worker-16] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:13:31,667 [Worker-16] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:13:31,669 [Worker-16] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:13:31,670 [Worker-16] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:14:04,341 [Worker-3] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:04,342 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:14:04,344 [Worker-3] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:04,345 [Worker-3] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:14:33,020 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:33,022 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:14:33,023 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:33,025 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:14:39,475 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:39,477 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:14:39,478 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:39,479 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:14:59,371 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:59,372 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:14:59,374 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:14:59,376 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:15:53,423 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:15:53,424 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:15:53,425 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:15:53,427 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:16:16,126 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:16:16,127 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:16:16,128 [Worker-12] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:16:16,129 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:17:51,586 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:17:51,587 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:17:51,588 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:17:51,589 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:18:18,072 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:18:18,074 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:18:18,075 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:18:18,076 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:18:58,557 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:18:58,558 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:18:58,560 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:18:58,561 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:19:04,958 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:04,959 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:19:04,960 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:04,961 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:19:11,623 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:11,625 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:19:11,626 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:11,627 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:19:36,416 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:36,417 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:19:36,418 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:19:36,419 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:21:04,448 [Worker-17] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:21:04,449 [Worker-17] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:21:04,451 [Worker-17] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:21:04,451 [Worker-17] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:22:54,848 [Worker-17] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:22:54,849 [Worker-17] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:22:54,851 [Worker-17] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:22:54,852 [Worker-17] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:23:43,993 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:23:43,994 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:23:43,995 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:23:43,996 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:24:29,053 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:24:29,055 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:24:29,056 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:24:29,057 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:24:45,617 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:24:45,618 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:24:45,619 [Worker-0] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:24:45,620 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:25:04,121 [Worker-18] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:25:04,123 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:25:04,124 [Worker-18] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:25:04,125 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:26:16,069 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:26:16,070 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:26:16,071 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:26:16,072 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:26:45,661 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:26:45,662 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:26:45,664 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:26:45,665 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:27:00,237 [Worker-8] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:00,239 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:27:00,240 [Worker-8] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:00,241 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:27:12,693 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:12,695 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:27:12,696 [Worker-4] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:12,697 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:27:26,670 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:26,671 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:27:26,672 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:26,673 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:27:32,924 [Worker-18] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:32,925 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:27:32,926 [Worker-18] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:27:32,928 [Worker-18] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:28:22,322 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:28:22,323 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:28:22,324 [Worker-5] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:28:22,325 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:29:49,792 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:29:49,793 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:29:49,794 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:29:49,794 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:31:01,448 [Worker-23] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:31:01,449 [Worker-23] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:31:01,451 [Worker-23] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:31:01,452 [Worker-23] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:31:28,403 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:31:28,405 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:31:28,406 [Worker-20] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:31:28,407 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources
+2016-04-09 01:34:20,723 [Worker-23] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:34:20,724 [Worker-23] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\main\resources
+2016-04-09 01:34:20,725 [Worker-23] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-04-09 01:34:20,726 [Worker-23] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\Joao Nogueira\Documents\GitHub\COMP-PDG\COMP_project_1\src\test\resources

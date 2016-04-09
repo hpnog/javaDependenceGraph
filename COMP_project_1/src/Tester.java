@@ -1,9 +1,11 @@
 import java.io.FileInputStream; 
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -29,6 +31,9 @@ public class Tester {
         //new MyVisitor().visit(cu,null);
     
 		new MethodVisitor().processNode(cu, "|");
+		
+		new MyVisitor().visit(cu, null);
+		
 	}
 	
 }
@@ -37,13 +42,10 @@ public class Tester {
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
     class MethodVisitor extends VoidVisitorAdapter {
-    	void processNode(Node child2, String treeSeparator){
-    		
-    		String elem = child2.toString();
-    		
-    		System.out.println(treeSeparator + child2.getClass()+ "\n" + getStringToPrint(elem, treeSeparator));
-    		
-    		for(Node child: child2.getChildrenNodes()){
+    	void processNode(Node child2, String treeSeparator){    		
+    		System.out.println(treeSeparator + child2.getClass()+ "\n" + getStringToPrint(child2.toString(), treeSeparator));
+
+    		for(Node child: child2.getChildrenNodes()){	
     			processNode(child, treeSeparator + "    |");
     		}
     	}
@@ -58,21 +60,23 @@ public class Tester {
 			}
 			return temp;
 		}
+		
+    }
+    
+
+	class MyVisitor extends VoidVisitorAdapter
+	{
 		@Override
         public void visit(MethodDeclaration n, Object arg) {
             // here you can access the attributes of the method.
             // this method will be called for all methods in this 
             // CompilationUnit, including inner class methods
            
-        	//System.out.println(n.getName());
+			System.out.print(ModifierSet.getAccessSpecifier(n.getModifiers()) + " ");	
+			System.out.println(n.getName());
             
             super.visit(n, arg);
         }
-    }
-    
-
-	class MyVisitor extends VoidVisitorAdapter
-	{
 	
 	    @Override
 	    public void visit (ExpressionStmt stmt, Object args)
