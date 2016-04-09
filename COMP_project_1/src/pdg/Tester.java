@@ -1,17 +1,22 @@
-import java.io.FileInputStream; 
+package pdg;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-
 public class Tester {
-	public static void main(String[] args) throws Exception {
-		// creates an input stream for the file to be parsed
-		FileInputStream in = new FileInputStream("src//test.java");
+	private static FileInputStream in;
+	
+	public Tester() {	}
+	
+	public static void addFile(FileInputStream inArg) throws ParseException, IOException {
+		in = inArg;
 		CompilationUnit cu;
 		try {
 		// parse the file
@@ -26,10 +31,11 @@ public class Tester {
         //new MyVisitor().visit(cu,null);
     
 		new MethodVisitor().processNode(cu, "|");
-				
 	}
 	
 }
+
+	
 
     /**
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
@@ -43,7 +49,7 @@ public class Tester {
     		System.out.println(getStringToPrint(child2.toString(), treeSeparator));
     		
     		for(Node child: child2.getChildrenNodes()){	
-    			processNode(child, treeSeparator + "    |");
+    			processNode(child, treeSeparator + "      |");
     		}
     	}
 
@@ -83,6 +89,7 @@ public class Tester {
     }
     
     /*
+     * 
 	class MyVisitor extends VoidVisitorAdapter
 	{
 		@Override
@@ -119,4 +126,6 @@ public class Tester {
 	    	super.visit(declarator,args);
 	    }
 	
-	}*/
+	}
+	*
+	*/
