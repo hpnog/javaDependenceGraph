@@ -1,4 +1,4 @@
-public class test extends testCase {
+public class test extends Tempo {
 
 	int asd = 2;
 	

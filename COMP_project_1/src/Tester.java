@@ -1,15 +1,10 @@
 import java.io.FileInputStream; 
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.visitor.ModifierVisitorAdapter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 
@@ -31,9 +26,7 @@ public class Tester {
         //new MyVisitor().visit(cu,null);
     
 		new MethodVisitor().processNode(cu, "|");
-		
-		new MyVisitor().visit(cu, null);
-		
+				
 	}
 	
 }
@@ -41,14 +34,40 @@ public class Tester {
     /**
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
-    class MethodVisitor extends VoidVisitorAdapter {
+    class MethodVisitor extends VoidVisitorAdapter<Object> {
     	void processNode(Node child2, String treeSeparator){    		
-    		System.out.println(treeSeparator + child2.getClass()+ "\n" + getStringToPrint(child2.toString(), treeSeparator));
+    		System.out.println(treeSeparator + child2.getClass());
 
+    		checkIfMethodAndPrintModifiers(child2, treeSeparator);
+    		
+    		System.out.println(getStringToPrint(child2.toString(), treeSeparator));
+    		
     		for(Node child: child2.getChildrenNodes()){	
     			processNode(child, treeSeparator + "    |");
     		}
     	}
+
+		private void checkIfMethodAndPrintModifiers(Node child2, String treeSeparator) {
+			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)) {
+				System.out.print(treeSeparator);
+				if(ModifierSet.isPrivate(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("private ");
+				if(ModifierSet.isPublic(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("public ");
+    			if(ModifierSet.isStatic(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("static ");
+    			if(ModifierSet.isStrictfp(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("strictfp ");
+    			if(ModifierSet.isSynchronized(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("syncronized ");
+    			if(ModifierSet.isTransient(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("transient ");
+    			if(ModifierSet.isVolatile(((MethodDeclaration) child2).getModifiers()))
+    		        System.out.print("volatile ");
+    			
+    			System.out.print("\n");
+    		}
+		}
         
     	private String getStringToPrint(String elem, String treeSeparator) {
 			String temp = treeSeparator;
@@ -63,7 +82,7 @@ public class Tester {
 		
     }
     
-
+    /*
 	class MyVisitor extends VoidVisitorAdapter
 	{
 		@Override
@@ -100,4 +119,4 @@ public class Tester {
 	    	super.visit(declarator,args);
 	    }
 	
-	}
+	}*/
