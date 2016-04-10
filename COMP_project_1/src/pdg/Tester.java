@@ -30,7 +30,7 @@ public class Tester {
         //print the above nodes using toString() 
         //new MyVisitor().visit(cu,null);
     
-		new MethodVisitor().processNode(cu, "|");
+		new MethodVisitor().processNode(cu);
 	}
 	
 }
@@ -41,21 +41,22 @@ public class Tester {
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
     class MethodVisitor extends VoidVisitorAdapter<Object> {
-    	void processNode(Node child2, String treeSeparator){    		
-    		System.out.println(treeSeparator + child2.getClass());
-
-    		checkIfMethodAndPrintModifiers(child2, treeSeparator);
+    	void processNode(Node child2){
+    		System.out.println("------------------------------------------------------------");
     		
-    		System.out.println(getStringToPrint(child2.toString(), treeSeparator));
+    		System.out.println(child2.getClass());
+
+    		checkIfMethodAndPrintModifiers(child2);
+    		
+    		System.out.println(child2.toString());
     		
     		for(Node child: child2.getChildrenNodes()){	
-    			processNode(child, treeSeparator + "      |");
+    			processNode(child);
     		}
     	}
 
-		private void checkIfMethodAndPrintModifiers(Node child2, String treeSeparator) {
+		private void checkIfMethodAndPrintModifiers(Node child2) {
 			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)) {
-				System.out.print(treeSeparator);
 				if(ModifierSet.isPrivate(((MethodDeclaration) child2).getModifiers()))
     		        System.out.print("private ");
 				if(ModifierSet.isPublic(((MethodDeclaration) child2).getModifiers()))
@@ -73,19 +74,7 @@ public class Tester {
     			
     			System.out.print("\n");
     		}
-		}
-        
-    	private String getStringToPrint(String elem, String treeSeparator) {
-			String temp = treeSeparator;
-			for(int i = 0; i < elem.length(); i++) {
-				if(elem.charAt(i) == '\n')
-					temp += elem.charAt(i) + treeSeparator;
-				else	
-					temp += elem.charAt(i);
-			}
-			return temp;
-		}
-		
+		}	
     }
     
     /*
