@@ -44,16 +44,21 @@ public class Tester {
     	void processNode(Node child2){
     		System.out.println("------------------------------------------------------------");
     		
-    		System.out.println(child2.getClass());
-
-    		checkIfMethodAndPrintModifiers(child2);
-    		
-    		System.out.println(child2.toString());
+    		if(relevant(child2)) {
+	    		System.out.println(child2.getClass());
+	    		checkIfMethodAndPrintModifiers(child2);
+	    		System.out.println(child2.toString());
+    		}
     		
     		for(Node child: child2.getChildrenNodes()){	
     			processNode(child);
     		}
     	}
+
+		private boolean relevant(Node child2) {
+			// TODO Auto-generated method stub
+			return false;
+		}
 
 		private void checkIfMethodAndPrintModifiers(Node child2) {
 			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)) {
