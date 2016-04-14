@@ -35,19 +35,18 @@ public class Tester {
 	
 }
 
-	
 
     /**
      * Simple visitor implementation for visiting MethodDeclaration nodes. 
      */
     class MethodVisitor extends VoidVisitorAdapter<Object> {
     	void processNode(Node child2){
-    		System.out.println("------------------------------------------------------------");
     		
     		if(relevant(child2)) {
-	    		System.out.println(child2.getClass());
-	    		checkIfMethodAndPrintModifiers(child2);
+    			System.out.println("------------------------------------------------------------");
+    			System.out.println(child2.getClass());
 	    		System.out.println(child2.toString());
+	    		//checkIfMethodAndPrintModifiers(child2);
     		}
     		
     		for(Node child: child2.getChildrenNodes()){	
@@ -56,28 +55,59 @@ public class Tester {
     	}
 
 		private boolean relevant(Node child2) {
-			// TODO Auto-generated method stub
-			return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.body.VariableDeclaratorId.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.expr.IntegerLiteralExpr.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.stmt.ExpressionStmt.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.expr.CharLiteralExpr.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.stmt.BlockStmt.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class))
+				return false;
+			if(child2.getClass().equals(com.github.javaparser.ast.type.PrimitiveType.class))
+				return false;
+			return true;
 		}
 
 		private void checkIfMethodAndPrintModifiers(Node child2) {
 			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)) {
-				if(ModifierSet.isPrivate(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("private ");
-				if(ModifierSet.isPublic(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("public ");
-    			if(ModifierSet.isStatic(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("static ");
-    			if(ModifierSet.isStrictfp(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("strictfp ");
-    			if(ModifierSet.isSynchronized(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("syncronized ");
-    			if(ModifierSet.isTransient(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("transient ");
-    			if(ModifierSet.isVolatile(((MethodDeclaration) child2).getModifiers()))
-    		        System.out.print("volatile ");
-    			
-    			System.out.print("\n");
+				if(ModifierSet.isPrivate(((MethodDeclaration) child2).getModifiers())){
+					System.out.println("------------------------------------------------------------");
+					System.out.print("ast.Modifier\nprivate\n");
+				}
+				if(ModifierSet.isPublic(((MethodDeclaration) child2).getModifiers())){
+					System.out.println("------------------------------------------------------------");
+					System.out.print("ast.Modifier\npublic\n");
+				}
+				if(ModifierSet.isStatic(((MethodDeclaration) child2).getModifiers())){
+					System.out.println("------------------------------------------------------------");
+					System.out.print("ast.Modifier\nstatic\n");    			
+				}
+    			if(ModifierSet.isStrictfp(((MethodDeclaration) child2).getModifiers())){
+    				System.out.println("------------------------------------------------------------");
+    				System.out.print("ast.Modifier\nstrictfp\n");
+				}
+    			if(ModifierSet.isSynchronized(((MethodDeclaration) child2).getModifiers())){
+    				System.out.println("------------------------------------------------------------");
+    				System.out.print("ast.Modifier\nsyncronized\n");
+				}
+    			if(ModifierSet.isTransient(((MethodDeclaration) child2).getModifiers())){
+    				System.out.println("------------------------------------------------------------");
+    				System.out.print("ast.Modifier\ntransient\n");
+    			}
+    			if(ModifierSet.isVolatile(((MethodDeclaration) child2).getModifiers())){
+    				System.out.println("------------------------------------------------------------");
+    				System.out.print("ast.Modifier\nvolatile\n");
+    			}
     		}
 		}	
     }
