@@ -29,14 +29,14 @@ import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 
-import pdg.Tester;
+import pdg.ASTPrinter;
 import java.awt.FlowLayout;
 import javax.swing.JScrollPane;
 import java.awt.Font;
 
 public class mainframe extends JFrame {
 	private JPanel contentPane;
-	private static Tester tester;
+	private static ASTPrinter astprinter;
 
 	/**
 	 * Launch the application.
@@ -44,7 +44,7 @@ public class mainframe extends JFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				tester = new Tester();
+				astprinter = new ASTPrinter();
 				try {
 					new mainframe();
 					
@@ -128,7 +128,7 @@ public class mainframe extends JFrame {
 		        if (returnValue == JFileChooser.APPROVE_OPTION) {
 			        File selectedFile = fileChooser.getSelectedFile();
 			        try {
-						Tester.addFile(new FileInputStream(selectedFile));
+						ASTPrinter.addFile(new FileInputStream(selectedFile));
 					} catch (ParseException | IOException e1) {	e1.printStackTrace();}
 			        
 			        try {
