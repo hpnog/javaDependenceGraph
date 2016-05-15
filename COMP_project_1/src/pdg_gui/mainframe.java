@@ -1,40 +1,39 @@
 package pdg_gui;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JTextArea;
-import javax.swing.border.EtchedBorder;
 import java.awt.Dimension;
-import java.awt.Component;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.github.javaparser.ParseException;
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.RowSpec;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JButton;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
-import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+
+import com.github.javaparser.ParseException;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.view.mxGraph;
 
 import pdg.ASTPrinter;
-import java.awt.FlowLayout;
-import javax.swing.JScrollPane;
-import java.awt.Font;
 
 public class mainframe extends JFrame {
+	
+	private mxGraph graph = new mxGraph();
+	private mxGraphComponent graphComponent;
+	
 	private JPanel contentPane;
 	private static ASTPrinter astprinter;
 
@@ -91,6 +90,7 @@ public class mainframe extends JFrame {
 		graphpanel.add(txtrGraphGoesHere);
 		txtrGraphGoesHere.setText("Graph goes here");
 		
+		startGraph(graphpanel);
 		
 		JTextArea txtrCodeGoesHere = new JTextArea();
 		txtrCodeGoesHere.setTabSize(2);
@@ -115,6 +115,15 @@ public class mainframe extends JFrame {
 		JButton callGraph = new JButton("Call Graph");
 		callGraph.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				graph.getModel().beginUpdate();
+				
+				// CALL THE GRAPH
+				graph.insertVertex(graph.getDefaultParent(), null, "TESTE2", 30, 80, 100, 50);
+				
+				// É PRECISO AQUI PREENCHER O GRAFO OU ESCOLHER COMO O MOSTRAR
+				
+				graph.getModel().endUpdate();
+				graphpanel.repaint();
 			}
 		});
 		callGraph.setBounds(1021, 14, 119, 25);
@@ -128,7 +137,7 @@ public class mainframe extends JFrame {
 		        if (returnValue == JFileChooser.APPROVE_OPTION) {
 			        File selectedFile = fileChooser.getSelectedFile();
 			        try {
-						ASTPrinter.addFile(new FileInputStream(selectedFile));
+						ASTPrinter.addFile(new FileInputStream(selectedFile));			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 					} catch (ParseException | IOException e1) {	e1.printStackTrace();}
 			        
 			        try {
@@ -149,5 +158,24 @@ public class mainframe extends JFrame {
 		//FINALIZE THE FRAME
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	private void startGraph(JPanel graphpanel) {
+		graphComponent = new mxGraphComponent(graph);
+		
+		graphComponent.setPreferredSize(new Dimension(930, 700));
+		graphpanel.removeAll();
+					
+		graphpanel.add(graphComponent);
+
+		graph.getModel().beginUpdate();
+		
+		Object parent = graph.getDefaultParent();
+		
+		graph.insertVertex(parent, null, "TESTE", 20, 50, 50, 20);
+		
+		graph.getModel().endUpdate();
+		
+		graphpanel.repaint();
 	}
 }

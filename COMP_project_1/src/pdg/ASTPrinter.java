@@ -109,8 +109,7 @@ public class ASTPrinter {
 				
 			}
 		}
-		
-		
+			
 		private void printMethodModifiers(Node child2) { 
 		
 				if(ModifierSet.isPrivate(((MethodDeclaration) child2).getModifiers())){
