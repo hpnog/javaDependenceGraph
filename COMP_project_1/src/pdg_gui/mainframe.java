@@ -34,6 +34,8 @@ public class mainframe extends JFrame {
 	private mxGraph graph = new mxGraph();
 	private mxGraphComponent graphComponent;
 	
+	private File selectedFile;
+	
 	private JPanel contentPane;
 	private static ASTPrinter astprinter;
 
@@ -117,6 +119,10 @@ public class mainframe extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				graph.getModel().beginUpdate();
 				
+				try {
+					ASTPrinter.addFile(new FileInputStream(selectedFile), graph);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
+		        
 				// CALL THE GRAPH
 				graph.insertVertex(graph.getDefaultParent(), null, "TESTE2", 30, 80, 100, 50);
 				
@@ -135,10 +141,7 @@ public class mainframe extends JFrame {
 				JFileChooser fileChooser = new JFileChooser();
 		        int returnValue = fileChooser.showOpenDialog(null);
 		        if (returnValue == JFileChooser.APPROVE_OPTION) {
-			        File selectedFile = fileChooser.getSelectedFile();
-			        try {
-						ASTPrinter.addFile(new FileInputStream(selectedFile));			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
-					} catch (ParseException | IOException e1) {	e1.printStackTrace();}
+			        selectedFile = fileChooser.getSelectedFile();
 			        
 			        try {
 						FileInputStream toCode = new FileInputStream(selectedFile);

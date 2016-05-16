@@ -10,13 +10,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.mxgraph.view.mxGraph;
 
 public class ASTPrinter {
 	private static FileInputStream in;
 	
 	public ASTPrinter() {	}
 	
-	public static void addFile(FileInputStream inArg) throws ParseException, IOException {
+	public static void addFile(FileInputStream inArg, mxGraph graph) throws ParseException, IOException {
 		in = inArg;
 		CompilationUnit cu;
 		try {
@@ -25,7 +26,7 @@ public class ASTPrinter {
 		} finally {
 		    in.close();
 		}    
-		new CodeVisitor().processNode(cu);
+		new CodeVisitor().processNode(cu, graph, graph.getDefaultParent());
 	}
 	
 }
@@ -36,7 +37,9 @@ public class ASTPrinter {
      */
     class CodeVisitor extends VoidVisitorAdapter<Object> {
     	
-    	void processNode(Node child2){ 
+    	void processNode(Node child2, mxGraph graph, Object lastParent){ 
+    		Object parent = lastParent;
+ 
     		if(relevant(child2)) {
     			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
     				printMethodModifiers(child2);
@@ -47,6 +50,13 @@ public class ASTPrinter {
     				printClassIntModifiers(child2);
     				ClassName(child2);
     				ClassExtension(child2);
+    			}    			
+    			
+    			
+    			else if (child2.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)) {
+    				parent = graph.insertVertex(parent ,null, 
+    						child2.toString(), graph.getView().getState(parent).getX() + 100, 
+    						graph.getView().getState(parent).getY() + 100, 500, 20);
     			}
     			else{
     				System.out.println("------------------------------------------------------------");
@@ -54,9 +64,11 @@ public class ASTPrinter {
     				System.out.println(child2.toString());
     			}
     		}	
+    		
+    		
     		for(Node child: child2.getChildrenNodes()){
     			
-    			processNode(child);
+    			processNode(child, graph, parent);
     		}
     	}
 
