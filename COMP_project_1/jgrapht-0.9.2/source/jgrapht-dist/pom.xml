@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jgrapht</groupId>
+		<artifactId>jgrapht</artifactId>
+		<version>0.9.2</version>
+	</parent>
+	<artifactId>jgrapht-dist</artifactId>
+	<name>JGraphT - Distributable Archives</name>
+	<packaging>pom</packaging>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License Version 2.1, February 1999</name>
+			<url>http://jgrapht.sourceforge.net/LGPL.html</url>
+			<distribution>repo</distribution>
+		</license>
+		<license>
+			<name>Eclipse Public License (EPL) 1.0</name>
+			<url>http://www.eclipse.org/legal/epl-v10.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jgrapht-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jgrapht-ext</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jgrapht-ext</artifactId>
+			<classifier>uber</classifier>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jgrapht-demo</artifactId>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<attach>true</attach>
+							<finalName>jgrapht-${project.version}</finalName>
+							<descriptorSourceDirectory>${basedir}/src/assembly</descriptorSourceDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>touchgraph</id>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>jgrapht-touchgraph</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+</project>

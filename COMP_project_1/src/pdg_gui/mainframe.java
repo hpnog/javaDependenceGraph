@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Scanner;
 
 import javax.swing.JButton;
@@ -23,21 +24,33 @@ import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import org.jgraph.JGraph;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.ListenableGraph;
+import org.jgrapht.ext.JGraphModelAdapter;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.ListenableDirectedGraph;
+
 import com.github.javaparser.ParseException;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
+import com.jgraph.layout.JGraphFacade;
+import com.jgraph.layout.organic.JGraphFastOrganicLayout;
 
 import pdg.ASTPrinter;
 
 public class mainframe extends JFrame {
 	
-	private mxGraph graph = new mxGraph();
-	private mxGraphComponent graphComponent;
-	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private File selectedFile;
 	
+	DirectedGraph<String, DefaultEdge> hrefGraph;
+    
 	private JPanel contentPane;
-	private static ASTPrinter astprinter;
+	private JPanel graphpanel;
 
 	/**
 	 * Launch the application.
@@ -45,7 +58,7 @@ public class mainframe extends JFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				astprinter = new ASTPrinter();
+				new ASTPrinter();
 				try {
 					new mainframe();
 					
@@ -81,7 +94,7 @@ public class mainframe extends JFrame {
 		
 		contentPane.add(codepanel);
 		
-		JPanel graphpanel = new JPanel();
+		graphpanel = new JPanel();
 		graphpanel.setBounds(343, 48, 941, 712);
 		graphpanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		contentPane.add(graphpanel);
@@ -92,8 +105,9 @@ public class mainframe extends JFrame {
 		graphpanel.add(txtrGraphGoesHere);
 		txtrGraphGoesHere.setText("Graph goes here");
 		
-		startGraph(graphpanel);
-		
+		createGraph();
+		resetGraph();
+        
 		JTextArea txtrCodeGoesHere = new JTextArea();
 		txtrCodeGoesHere.setTabSize(2);
 		txtrCodeGoesHere.setFont(new Font("Monospaced", Font.PLAIN, 11));
@@ -109,7 +123,7 @@ public class mainframe extends JFrame {
 		lblVariable.setBounds(343, 18, 56, 16);
 		contentPane.add(lblVariable);
 		
-		JComboBox selvar = new JComboBox();
+		JComboBox<Object> selvar = new JComboBox<Object>();
 		selvar.setBounds(391, 18, 113, 22);
 		contentPane.add(selvar);
 		
@@ -117,19 +131,11 @@ public class mainframe extends JFrame {
 		JButton callGraph = new JButton("Call Graph");
 		callGraph.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				graph.getModel().beginUpdate();
-				
 				try {
-					ASTPrinter.addFile(new FileInputStream(selectedFile), graph);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+					ASTPrinter.addFile(new FileInputStream(selectedFile), hrefGraph, "Program");			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
-		        
-				// CALL THE GRAPH
-				graph.insertVertex(graph.getDefaultParent(), null, "TESTE2", 30, 80, 100, 50);
-				
-				// É PRECISO AQUI PREENCHER O GRAFO OU ESCOLHER COMO O MOSTRAR
-				
-				graph.getModel().endUpdate();
-				graphpanel.repaint();
+		        				
+				resetGraph();
 			}
 		});
 		callGraph.setBounds(1021, 14, 119, 25);
@@ -137,6 +143,7 @@ public class mainframe extends JFrame {
 
 		JButton chfile = new JButton("Choose File");
 		chfile.addActionListener(new ActionListener() {
+			@SuppressWarnings("resource")
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
 		        int returnValue = fileChooser.showOpenDialog(null);
@@ -144,7 +151,6 @@ public class mainframe extends JFrame {
 			        selectedFile = fileChooser.getSelectedFile();
 			        
 			        try {
-						FileInputStream toCode = new FileInputStream(selectedFile);
 						String content = new Scanner(selectedFile).useDelimiter("\\Z").next();
 						txtrCodeGoesHere.setText(content);
 					} catch (FileNotFoundException e1) {
@@ -157,28 +163,50 @@ public class mainframe extends JFrame {
 		chfile.setBounds(1150, 12, 134, 25);
 		contentPane.add(chfile);
 		
-		
 		//FINALIZE THE FRAME
 		frame.pack();
 		frame.setVisible(true);
 	}
 
-	private void startGraph(JPanel graphpanel) {
-		graphComponent = new mxGraphComponent(graph);
-		
-		graphComponent.setPreferredSize(new Dimension(930, 700));
+	private void resetGraph() {
+		JGraph jgraph = getJgraph();
+        
 		graphpanel.removeAll();
-					
-		graphpanel.add(graphComponent);
-
-		graph.getModel().beginUpdate();
 		
-		Object parent = graph.getDefaultParent();
+		graphpanel.add(jgraph);
 		
-		graph.insertVertex(parent, null, "TESTE", 20, 50, 50, 20);
-		
-		graph.getModel().endUpdate();
+		jgraph.setPreferredSize(new Dimension((int) graphpanel.getSize().getWidth() - 10, (int) (graphpanel.getSize().getHeight() - 10)));
 		
 		graphpanel.repaint();
+		graphpanel.revalidate();
 	}
+
+	private void createGraph() {
+		hrefGraph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
+		String program = "Program";
+		hrefGraph.addVertex(program);
+	}
+	
+	private JGraph getJgraph() {
+		// create a JGraphT graph
+	    ListenableGraph<String, DefaultEdge> g = new ListenableDirectedGraph<String, DefaultEdge>(hrefGraph);
+	    // create a visualization using JGraph, via the adapter
+	    JGraph jgraph = new JGraph(new JGraphModelAdapter<String, DefaultEdge>(g));
+	    	    
+	 // Let's see if we can lay it out
+	    JGraphFacade jgf = new JGraphFacade(jgraph);
+	    JGraphFastOrganicLayout layoutifier = new JGraphFastOrganicLayout();
+	    layoutifier.run(jgf);
+	    System.out.println("Layout complete");
+
+	    final Map<?, ?> nestedMap = jgf.createNestedMap(true, true);
+	    jgraph.getGraphLayoutCache().edit(nestedMap);
+	    
+	    jgraph.getGraphLayoutCache().update();
+	    jgraph.refresh();
+	    
+	    return jgraph;
+	}
+
+
 }

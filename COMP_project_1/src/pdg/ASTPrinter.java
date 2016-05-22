@@ -2,6 +2,9 @@ package pdg;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
@@ -9,6 +12,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.mxgraph.view.mxGraph;
 
@@ -17,7 +21,7 @@ public class ASTPrinter {
 	
 	public ASTPrinter() {	}
 	
-	public static void addFile(FileInputStream inArg, mxGraph graph) throws ParseException, IOException {
+	public static void addFile(FileInputStream inArg, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode) throws ParseException, IOException {
 		in = inArg;
 		CompilationUnit cu;
 		try {
@@ -26,7 +30,7 @@ public class ASTPrinter {
 		} finally {
 		    in.close();
 		}    
-		new CodeVisitor().processNode(cu, graph, graph.getDefaultParent());
+		new CodeVisitor().processNode(cu, hrefGraph, previousNode);
 	}
 	
 }
@@ -37,9 +41,9 @@ public class ASTPrinter {
      */
     class CodeVisitor extends VoidVisitorAdapter<Object> {
     	
-    	void processNode(Node child2, mxGraph graph, Object lastParent){ 
-    		Object parent = lastParent;
- 
+    	void processNode(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode){ 
+    		String nextNode = previousNode;
+    		
     		if(relevant(child2)) {
     			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
     				printMethodModifiers(child2);
@@ -50,14 +54,14 @@ public class ASTPrinter {
     				printClassIntModifiers(child2);
     				ClassName(child2);
     				ClassExtension(child2);
-    			}    			
-    			
+    			}    		
     			
     			else if (child2.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)) {
-    				parent = graph.insertVertex(parent ,null, 
-    						child2.toString(), graph.getView().getState(parent).getX() + 100, 
-    						graph.getView().getState(parent).getY() + 100, 500, 20);
+    				hrefGraph.addVertex(child2.toString());
+    				hrefGraph.addEdge(previousNode, child2.toString());
+    				nextNode = child2.toString();
     			}
+    			
     			else{
     				System.out.println("------------------------------------------------------------");
     				System.out.println(child2.getClass());
@@ -68,7 +72,7 @@ public class ASTPrinter {
     		
     		for(Node child: child2.getChildrenNodes()){
     			
-    			processNode(child, graph, parent);
+    			processNode(child, hrefGraph, nextNode);
     		}
     	}
 
