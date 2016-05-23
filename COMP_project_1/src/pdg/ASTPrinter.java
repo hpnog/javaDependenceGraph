@@ -14,10 +14,11 @@ import com.mxgraph.view.mxGraph;
 
 public class ASTPrinter {
 	private static FileInputStream in;
+	private SymbolTable st;
 	
 	public ASTPrinter() {	}
 	
-	public static void addFile(FileInputStream inArg, mxGraph graph) throws ParseException, IOException {
+	public void addFile(FileInputStream inArg, mxGraph graph) throws ParseException, IOException {
 		in = inArg;
 		CompilationUnit cu;
 		try {
@@ -25,22 +26,32 @@ public class ASTPrinter {
 			cu = JavaParser.parse(in);
 		} finally {
 		    in.close();
-		}    
-		new CodeVisitor().processNode(cu, graph, graph.getDefaultParent());
+		}
+		
+		st= new SymbolTable();
+		new CodeVisitor().processNode(cu, graph, graph.getDefaultParent(), st);
+		
+		for(int i = 0; i < st.scopes.size(); i++){
+			System.out.println("SCOPE "+ st.scopes.get(i)+"\n");
+		}
+		
 	}
 	
 }
-
 
     /**
      * Simple visitor implementation for visiting nodes. 
      */
     class CodeVisitor extends VoidVisitorAdapter<Object> {
     	
-    	void processNode(Node child2, mxGraph graph, Object lastParent){ 
+    	boolean processNode(Node child2, mxGraph graph, Object lastParent, SymbolTable st){ 
     		Object parent = lastParent;
  
+    		
     		if(relevant(child2)) {
+        		if(!st.addNode(child2))
+        			return false;
+        		
     			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
     				printMethodModifiers(child2);
     				MethodType(child2);
@@ -68,8 +79,10 @@ public class ASTPrinter {
     		
     		for(Node child: child2.getChildrenNodes()){
     			
-    			processNode(child, graph, parent);
+    			if(!processNode(child, graph, parent, st))
+    				return false;
     		}
+			return true;
     	}
 
 		private boolean relevant(Node child2) {

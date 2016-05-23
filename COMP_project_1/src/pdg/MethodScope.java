@@ -6,7 +6,7 @@ public class MethodScope {
 	String className;
 	String Type;
 	String Name;
-	Hashtable<String,String> paramTable;
-	Hashtable<String,String> localVarTable;
+	Hashtable<String,String> paramTable =  new Hashtable<String, String>();
+	Hashtable<String,String> localVarTable =  new Hashtable<String, String>();
 	
 }

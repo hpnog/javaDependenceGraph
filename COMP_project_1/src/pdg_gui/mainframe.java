@@ -120,7 +120,7 @@ public class mainframe extends JFrame {
 				graph.getModel().beginUpdate();
 				
 				try {
-					ASTPrinter.addFile(new FileInputStream(selectedFile), graph);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+					astprinter.addFile(new FileInputStream(selectedFile), graph);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
 		        
 				// CALL THE GRAPH
