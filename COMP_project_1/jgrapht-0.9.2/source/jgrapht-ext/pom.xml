@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jgrapht</groupId>
+		<artifactId>jgrapht</artifactId>
+		<version>0.9.2</version>
+	</parent>
+	<artifactId>jgrapht-ext</artifactId>
+	<name>JGraphT - Ext</name>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License Version 2.1, February 1999</name>
+			<url>http://jgrapht.sourceforge.net/LGPL.html</url>
+			<distribution>repo</distribution>
+		</license>
+		<license>
+			<name>Eclipse Public License (EPL) 1.0</name>
+			<url>http://www.eclipse.org/legal/epl-v10.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>uber</shadedClassifierName>
+                    <!--
+					<finalName>${project.artifactId}-${project.version}-uber</finalName>
+-->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<instructions>
+						<Bundle-Vendor>Barak Naveh, John V. Sichi and contributors (see
+							http://sourceforge.net/projects/jgrapht/)</Bundle-Vendor>
+						<!--
+							JGraph (source code at https://github.com/jgraph/legacy-jgraph5.git)
+							is legacy and it does not have a Maven based build. Therefore it is
+							unlikely that JGraph will be osgified. To be able to nevertheless use
+							the jgraph-ext bundle in an OSGi context, we tell the maven	bundle
+							plugin to mark the JGraph dependencies as optional. Consequences:
+							When using jgrapht-ext in an OSGi context you can not use one of
+							it's classes which require packages from JGraph (org.jgraph.*).
+							Otherwise you will get ClassNotFoundExceptions.
+						-->
+						<Import-Package>org.jgraph.*;resolution:=optional,*</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jgrapht-core</artifactId>
+		</dependency>
+        <dependency>
+                <groupId>org.tinyjee.jgraphx</groupId>
+                    <artifactId>jgraphx</artifactId>
+                        <version>2.0.0.1</version>
+                    </dependency>
+		<dependency>
+			<groupId>jgraph</groupId>
+			<artifactId>jgraph</artifactId>
+			<version>5.13.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>xmlunit</groupId>
+			<artifactId>xmlunit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+</project>
