@@ -35,9 +35,7 @@ public class ASTPrinter {
 		st= new SymbolTable();
 		new CodeVisitor().processNode(cu, hrefGraph, previousNode, st);
 		
-		for(int i = 0; i < st.scopes.size(); i++){
-			System.out.println("SCOPE "+ st.scopes.get(i)+"\n");
-		}
+		st.printSymbolTable();
 	}
 	
 }
