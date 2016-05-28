@@ -248,10 +248,89 @@ public class SymbolTable {
 
 			
 		}
-		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
-			int a;
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
+			boolean varfound=false;
+			int i = 0;
 			for(Node child: node.getChildrenNodes()){			
-				System.out.println("FILHO DO RETURN:"+child.toString());
+				if(i==0){
+					if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+						if(lastScope.getClass()==MethodScope.class){
+							if(lastMethod.paramTable.containsKey(child.toString()))
+								varfound=true;
+							if(lastMethod.localVarTable.containsKey(child.toString()))
+								varfound=true;
+						}
+						if(lastScope.getClass()==LoopScope.class){
+							if(lastMethod.paramTable.containsKey(child.toString()))
+								varfound=true;
+							if(lastMethod.localVarTable.containsKey(child.toString()))
+								varfound=true;
+							if(lastLoop.localVarTable.containsKey(child.toString()))
+								varfound=true;
+						}
+						if(!varfound){
+							System.out.println("error:Variable with identifier "+child.toString()+" is undefined");
+							return false;
+						}
+					}
+				}
+				i++;
+			}
+		}
+		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
+			int i=0;
+			boolean varfound = false;
+			for(Node child: node.getChildrenNodes()){			
+				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+					if(lastMethod.paramTable.containsKey(child.toString())){
+						if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
+							System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
+							return false;
+						}
+						varfound=true;
+					}
+					if(lastMethod.localVarTable.containsKey(child.toString())){
+						if(!lastMethod.localVarTable.get(child.toString()).equals(lastMethod.Type)){
+							System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
+							return false;
+						}
+						varfound=true;
+					}
+					if(!varfound){
+						System.out.println("error:Variable with identifier "+child.toString()+" is undefined");
+						return false;
+					}
+				}
+				else if(child.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
+					for(Node child2: child.getChildrenNodes()){			
+						if(i==0){
+							if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+								if(lastMethod.paramTable.containsKey(child2.toString())){
+									if(!lastMethod.paramTable.get(child2.toString()).equals(lastMethod.Type)){
+										System.out.println(""+lastMethod.paramTable.get(child2.toString())+"");	
+										System.out.println(""+lastMethod.Type+"");	
+										System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
+										return false;
+									}
+									varfound=true;
+								}
+								if(lastMethod.localVarTable.containsKey(child2.toString())){
+									if(!lastMethod.localVarTable.get(child2.toString()).equals(lastMethod.Type)){	
+										System.out.println(""+lastMethod.localVarTable.get(child2.toString())+"");
+										System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
+										return false;
+									}
+									varfound=true;
+								}
+								if(!varfound){
+									System.out.println("error:Variable with identifier "+child2.toString()+" is undefined");
+									return false;
+								}
+							}
+						}
+						i++;
+					}
+				}
 			}
 		}
 		return true;
