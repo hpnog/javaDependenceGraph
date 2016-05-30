@@ -11,6 +11,11 @@ public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
 	//overall symbol tables can be accessed through here
 	ArrayList<Object> scopes;
+	private ClassScope lastClass = null;
+	private MethodScope lastMethod = null;
+	private LoopScope lastLoop = null;
+	private Object lastScope = null;
+	
 	public SymbolTable(){
 		scopes = new ArrayList<Object>();
 	}
@@ -32,14 +37,8 @@ public class SymbolTable {
 			return false;
 		return true;
 	}
-	
-	ClassScope lastClass = null;
-	MethodScope lastMethod = null;
-	LoopScope lastLoop = null;
-	Object lastScope = null;
 
-	
-	public void printSymbolTable(){
+	public void printSymbolTable(){ 
 		for(int i = 0; i < scopes.size(); i++){
 			System.out.println("SCOPE "+ scopes.get(i)+"\n");
 			if(scopes.get(i).getClass()==ClassScope.class){
@@ -53,49 +52,46 @@ public class SymbolTable {
 				
 			}
 			if(scopes.get(i).getClass()==LoopScope.class){
-				((LoopScope)scopes.get(i)).localVarTable.toString();
+				System.out.println(((LoopScope)scopes.get(i)).localVarTable.toString());
 			}
 		}
 	}
 	
-	public boolean addNode(Node node) {
+	private void fillClassScope(Node node,ClassScope classScp){ 
+		
+		classScp.Name = ((ClassOrInterfaceDeclaration)node).getNameExpr().toString();
+		classScp.Type=((ClassOrInterfaceDeclaration)node).getExtends().toString();
+	}
+	private boolean addClassScope(ClassScope cs){ 
+		if(!scopes.contains(cs)){
+			scopes.add(cs);
+			lastClass = cs;
+			lastScope = cs;
+			return true;
+		}
+		else return false;
+	}
+	
+	private void fillLoopScope(Node node,LoopScope loopScp){
+		loopScp.ClassName = lastClass.Name;
+		loopScp.MethodName = lastMethod.Name;
+		
+	}
+	private void addLoopScope(LoopScope ls){
+			scopes.add(ls);
+			lastLoop = ls;
+			lastScope = ls;
+	}
+	
+	public String SemanticNodeCheck(Node node) {
+		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
-			classScp.Name = ((ClassOrInterfaceDeclaration)node).getNameExpr().toString();
-			/*
-			if(ModifierSet.isPrivate(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "private";
-			}
-			if(ModifierSet.isPublic(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "public";
-			}
-			if(ModifierSet.isStatic(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "static";	
-			}
-			if(ModifierSet.isStrictfp(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "strictfp";
-			}
-			if(ModifierSet.isSynchronized(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "synchronized";
-			}
-			if(ModifierSet.isTransient(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "transient";
-			}
-			if(ModifierSet.isVolatile(((ClassOrInterfaceDeclaration) node).getModifiers())){
-				classScp.Type = "volatile";
-			}*/
-			classScp.Type=((ClassOrInterfaceDeclaration)node).getExtends().toString();
-			if(!scopes.contains(classScp)){
-			scopes.add(classScp);
-			lastClass = classScp;
-			lastScope = classScp;}
-			else{
-				System.out.println("error:repeated class/interface declaration");
-				return false;
-			}
-				
-	
+			fillClassScope(node,classScp);
+			if(!addClassScope(classScp))
+				return "error:repeated class/interface declaration of "+classScp.Name+"";
 		}    		
+		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
 			MethodScope methodScp = new MethodScope();
 			methodScp.Type = ((MethodDeclaration)node).getType().toString();
@@ -109,11 +105,11 @@ public class SymbolTable {
 			lastMethod = methodScp;
 			lastScope = methodScp;}
 			else{
-				System.out.println("error:repeated method declaration");
-				return false;
+				return "error:repeated method declaration of "+methodScp.Name+"";
 			}
 		
 		}
+		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.Parameter.class)){
 			int i = 0;
 			String paramName = null;
@@ -133,16 +129,15 @@ public class SymbolTable {
 			if(!lastMethod.paramTable.containsKey(paramName))
 				lastMethod.paramTable.put(paramName, paramType);
 			else{
-				System.out.println("error: duplicated param identifier  : "+paramName+" in Method:"+lastMethod.Name+"");
-				return false;
+				return "error: duplicated param identifier  : "+paramName+" in Method:"+lastMethod.Name+"";
 			}
 			
 		}
+		
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			int c=0,i = 0;
 			String varName = null;
 			String varType = null;
-		
 			
 			for(Node child: node.getChildrenNodes()){			
 				if(i == 0){
@@ -162,25 +157,20 @@ public class SymbolTable {
 			
 			}
 			
-		
 			if(lastScope.equals(lastMethod)){
 				if(!lastMethod.localVarTable.containsKey(varName))
 					lastMethod.localVarTable.put(varName, varType);
 				else{
-					System.out.println("error: duplicated variable declaration: "+varName+"");
-					return false;
+					return "error: duplicated variable declaration: "+varName+"";
 				}
 			}
+			
 			else if(lastScope.equals(lastLoop)){
 				if(!lastLoop.localVarTable.containsKey(varName))
 					lastLoop.localVarTable.put(varName, varType);
-				//variables can be redeclared inside loop scopes in java it seems http://stackoverflow.com/questions/30857753/re-declaring-variables-inside-loops-in-java
-				/*else{
-					System.out.println("error: duplicated variable declaration: "+varName+"");
-					return false;
-				}*/
 			}
 		}
+		
 		else if (node.getClass().equals(com.github.javaparser.ast.body.FieldDeclaration.class)) {
 			int i=0,c = 0;
 			String fieldName = null;
@@ -201,53 +191,32 @@ public class SymbolTable {
 					}
 				}
 				
-			
 			}
 				if(!lastClass.fieldTable.containsKey(fieldName))
 					lastClass.fieldTable.put(fieldName, fieldType);
 				else{
-					System.out.println("error: duplicated fields");
-					return false;
+					return "error: duplicated fields: "+fieldName+" in class : "+lastClass.Name+"";
 				}
 		}
+		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.ForStmt.class)) {
 			LoopScope loopScp = new LoopScope();
-			
-			loopScp.ClassName = lastClass.Name;
-			loopScp.MethodName = lastMethod.Name;
-			
-			if(!scopes.contains(loopScp)){
-				scopes.add(loopScp);
-				lastLoop = loopScp;
-				lastScope = loopScp;}
-		
-			
+			fillLoopScope(node,loopScp);
+			addLoopScope(loopScp);
 		}
+		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
 			LoopScope loopScp = new LoopScope();
-			
-			loopScp.ClassName = lastClass.Name;
-			loopScp.MethodName = lastMethod.Name;
-			
-			if(!scopes.contains(loopScp)){
-				scopes.add(loopScp);
-				lastLoop = loopScp;
-				lastScope = loopScp;}
-		
+			fillLoopScope(node,loopScp);
+			addLoopScope(loopScp);
 		}
+		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
 			LoopScope loopScp = new LoopScope();
-			
-			loopScp.ClassName = lastClass.Name;
-			loopScp.MethodName = lastMethod.Name;
-			
-			if(!scopes.contains(loopScp)){
-				scopes.add(loopScp);
-				lastLoop = loopScp;
-				lastScope = loopScp;}
-
-			
+			fillLoopScope(node,loopScp);
+			addLoopScope(loopScp);
 		}
+		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
 			boolean varfound=false;
 			int i = 0;
@@ -269,8 +238,7 @@ public class SymbolTable {
 								varfound=true;
 						}
 						if(!varfound){
-							System.out.println("error:Variable with identifier "+child.toString()+" is undefined");
-							return false;
+							return "error:Variable with identifier "+child.toString()+" is undefined";
 						}
 					}
 				}
@@ -284,21 +252,19 @@ public class SymbolTable {
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 					if(lastMethod.paramTable.containsKey(child.toString())){
 						if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
-							System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
-							return false;
+
+							return "error:Type of return value -"+lastMethod.paramTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
 						}
 						varfound=true;
 					}
 					if(lastMethod.localVarTable.containsKey(child.toString())){
 						if(!lastMethod.localVarTable.get(child.toString()).equals(lastMethod.Type)){
-							System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
-							return false;
+							return "error:Type of return value -"+lastMethod.localVarTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
 						}
 						varfound=true;
 					}
 					if(!varfound){
-						System.out.println("error:Variable with identifier "+child.toString()+" is undefined");
-						return false;
+						return "error:Variable with identifier "+child.toString()+" is undefined";
 					}
 				}
 				else if(child.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
@@ -307,24 +273,13 @@ public class SymbolTable {
 							if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 								if(lastMethod.paramTable.containsKey(child2.toString())){
 									if(!lastMethod.paramTable.get(child2.toString()).equals(lastMethod.Type)){
-										System.out.println(""+lastMethod.paramTable.get(child2.toString())+"");	
-										System.out.println(""+lastMethod.Type+"");	
-										System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
-										return false;
+										return "error:Type of return value -"+lastMethod.paramTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
 									}
-									varfound=true;
 								}
 								if(lastMethod.localVarTable.containsKey(child2.toString())){
 									if(!lastMethod.localVarTable.get(child2.toString()).equals(lastMethod.Type)){	
-										System.out.println(""+lastMethod.localVarTable.get(child2.toString())+"");
-										System.out.println("error:Type of return value doesnt match method: "+lastMethod.Name+" type "+lastMethod.Type+"");
-										return false;
+										return "error:Type of return value -"+lastMethod.localVarTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
 									}
-									varfound=true;
-								}
-								if(!varfound){
-									System.out.println("error:Variable with identifier "+child2.toString()+" is undefined");
-									return false;
 								}
 							}
 						}
@@ -333,7 +288,7 @@ public class SymbolTable {
 				}
 			}
 		}
-		return true;
+		return "clear";
 	}
 
 }

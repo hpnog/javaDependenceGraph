@@ -37,7 +37,7 @@ import com.github.javaparser.ParseException;
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.organic.JGraphFastOrganicLayout;
 
-import pdg.ASTPrinter;
+import pdg.PDGCore;
 
 public class mainframe extends JFrame {
 	
@@ -50,7 +50,7 @@ public class mainframe extends JFrame {
 	
 	DirectedGraph<String, DefaultEdge> hrefGraph;
     
-	private ASTPrinter astprinter = new ASTPrinter();
+	private PDGCore astprinter = new PDGCore();
 	
 	private JPanel contentPane;
 	private JPanel graphpanel;
@@ -61,7 +61,7 @@ public class mainframe extends JFrame {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				new ASTPrinter();
+				new PDGCore();
 				try {
 					new mainframe();
 					

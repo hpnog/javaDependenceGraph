@@ -1,6 +1,7 @@
 package pdg;
-import java.io.FileInputStream;
+import java.io.FileInputStream; 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -16,11 +17,11 @@ import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.mxgraph.view.mxGraph;
 
-public class ASTPrinter {
+public class PDGCore {
 	private static FileInputStream in;
 	private SymbolTable st;
 	
-	public ASTPrinter() {	}
+	public PDGCore() {	}
 	
 	public void addFile(FileInputStream inArg, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode) throws ParseException, IOException {
 		in = inArg;
@@ -33,9 +34,13 @@ public class ASTPrinter {
 		}
 		
 		st= new SymbolTable();
-		new CodeVisitor().processNode(cu, hrefGraph, previousNode, st);
-		
+		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
+		CodeVisitor cv = new CodeVisitor();
+		cv.semanticAnalysis(cu,st);
+		cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st.printSymbolTable();
+		
+		
 	}
 	
 }
@@ -44,13 +49,67 @@ public class ASTPrinter {
      * Simple visitor implementation for visiting nodes. 
      */
     class CodeVisitor extends VoidVisitorAdapter<Object> {
-    	boolean processNode(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode, SymbolTable st){ 
+    	
+    	ArrayList<String> errorlist;
+    	
+    	CodeVisitor(){
+    		errorlist= new ArrayList<String>();
+    	}
+    	
+    	//SEMANTIC ANALYSIS
+    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st){
+    		String error;
+    		
+    		if(relevant(node)) {
+        		if((error=st.SemanticNodeCheck(node))!="clear") 		
+    			errorlist.add(error);
+    		}
+ 
+    		for(Node child: node.getChildrenNodes()){
+    			semanticAnalysis(child,st);
+    		}
+    		
+    		return errorlist;
+    	}
+    	
+    	void printSemanticErrors() {
+    		for(String error: errorlist){
+				System.out.println(error);
+			}	
+		}
+    	
+		//GRAPH BUILDING
+    	boolean buildGraph(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode, SymbolTable st){ 
+    		//check for errors
+    		if(errorlist.size()!=0){
+    			printSemanticErrors();
+    			return false;
+    		}
+    		
     		String nextNode = previousNode;
     		
     		if(relevant(child2)) {
-        		if(!st.addNode(child2))
-        			return false;
-        		
+    			
+    			if (child2.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)) {
+    				hrefGraph.addVertex(child2.toString());
+    				hrefGraph.addEdge(previousNode, child2.toString());
+    				nextNode = child2.toString();
+    			}
+    			
+    		}	
+    		
+    		
+    		for(Node child: child2.getChildrenNodes()){
+      			if(!buildGraph(child, hrefGraph, nextNode, st))
+    				return false;
+    		}
+			return true;
+    	}
+
+		
+		//AST PRINTING
+		void astPrint(Node child2){
+    		if(relevant(child2)) {
     			if(child2.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
     				printMethodModifiers(child2);
     				MethodType(child2);
@@ -62,25 +121,15 @@ public class ASTPrinter {
     				ClassExtension(child2);
     			}    		
     			
-    			else if (child2.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)) {
-    				hrefGraph.addVertex(child2.toString());
-    				hrefGraph.addEdge(previousNode, child2.toString());
-    				nextNode = child2.toString();
-    			}
-    			
     			else{
     				System.out.println("------------------------------------------------------------");
     				System.out.println(child2.getClass());
     				System.out.println(child2.toString());
     			}
-    		}	
-    		
-    		
-    		for(Node child: child2.getChildrenNodes()){
-      			if(!processNode(child, hrefGraph, nextNode, st))
-    				return false;
     		}
-			return true;
+    		for(Node child: child2.getChildrenNodes()){
+    			astPrint(child);
+    		}
     	}
 
 		private boolean relevant(Node child2) {
@@ -196,5 +245,6 @@ public class ASTPrinter {
 				System.out.print("ClassOrInterface.Modifier\nvolatile\n");
 			}
 	}
-    	}
+
+}
     
