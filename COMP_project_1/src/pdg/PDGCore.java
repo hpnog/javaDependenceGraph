@@ -36,6 +36,7 @@ public class PDGCore {
 		st= new SymbolTable();
 		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
 		CodeVisitor cv = new CodeVisitor();
+		cv.astPrint(cu);
 		cv.semanticAnalysis(cu,st);
 		cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st.printSymbolTable();
@@ -139,8 +140,8 @@ public class PDGCore {
 				return false;
 			if(child2.getClass().equals(com.github.javaparser.ast.stmt.ExpressionStmt.class))
 				return false;
-			if(child2.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class))
-				return false;
+			//if(child2.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class))
+			//	return false;
 			if(child2.getClass().equals(com.github.javaparser.ast.stmt.BlockStmt.class))
 				return false;
 			if(child2.getClass().equals(com.github.javaparser.ast.type.VoidType.class))
