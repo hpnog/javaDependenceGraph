@@ -38,6 +38,11 @@ import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.organic.JGraphFastOrganicLayout;
 
 import pdg.PDGCore;
+import org.jgraph.graph.GraphModel;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class mainframe extends JFrame {
 	
@@ -53,7 +58,6 @@ public class mainframe extends JFrame {
 	private PDGCore astprinter = new PDGCore();
 	
 	private JPanel contentPane;
-	private JPanel graphpanel;
 
 	/**
 	 * Launch the application.
@@ -77,8 +81,8 @@ public class mainframe extends JFrame {
 	 */
 	public mainframe() {
 		final JFrame frame = new JFrame();
+		frame.setMinimumSize(new Dimension(1000, 400));
 		frame.setPreferredSize(new Dimension(1300, 800));
-		frame.setResizable(false);
 		frame.setTitle("Java PDG Generator");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -86,30 +90,17 @@ public class mainframe extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		frame.setContentPane(contentPane);
-		contentPane.setLayout(null);
+		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		//CONTENT PANELS
 		JPanel codepanel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) codepanel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEADING);
-		codepanel.setBounds(12, 18, 321, 742);
 		codepanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		
-		contentPane.add(codepanel);
-		
-		graphpanel = new JPanel();
-		graphpanel.setBounds(343, 48, 941, 712);
-		graphpanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		contentPane.add(graphpanel);
-		
-		
-		//TEXT AREAS
-		JTextArea txtrGraphGoesHere = new JTextArea();
-		graphpanel.add(txtrGraphGoesHere);
-		txtrGraphGoesHere.setText("Graph goes here");
+		contentPane.add(codepanel, BorderLayout.WEST);
 		
 		createGraph();
 		resetGraph();
+		codepanel.setLayout(new BorderLayout(0, 0));
         
 		JTextArea txtrCodeGoesHere = new JTextArea();
 		txtrCodeGoesHere.setTabSize(2);
@@ -117,54 +108,47 @@ public class mainframe extends JFrame {
 		txtrCodeGoesHere.setEditable(false);
 		txtrCodeGoesHere.setBorder(codepanel.getBorder());
 		JScrollPane scroll = new JScrollPane(txtrCodeGoesHere, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		scroll.setPreferredSize(new Dimension(307, 725));
+		scroll.setPreferredSize(new Dimension(400, 725));
 		codepanel.add(scroll);
-		txtrCodeGoesHere.setText("Code goes here");
+		txtrCodeGoesHere.setText("Code goes here");		
 		
-		//SELECT VARIABLE TO TRACK STUFF
-		JLabel lblVariable = new JLabel("Variable:");
-		lblVariable.setBounds(343, 18, 56, 16);
-		contentPane.add(lblVariable);
+		JPanel graphPane = new JPanel();
+		contentPane.add(graphPane, BorderLayout.CENTER);
+		graphPane.setLayout(new BorderLayout(0, 0));
 		
-		JComboBox<Object> selvar = new JComboBox<Object>();
-		selvar.setBounds(391, 18, 113, 22);
-		contentPane.add(selvar);
+		JPanel optionsPane = new JPanel();
+		graphPane.add(optionsPane, BorderLayout.NORTH);
+		optionsPane.setLayout(new BorderLayout(0, 0));
 		
-		//BUTTONS
-		JButton callGraph = new JButton("Call Graph");
-		callGraph.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, "Program");			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
-				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
-		        				
-				resetGraph();
-			}
-		});
-		callGraph.setBounds(1021, 14, 119, 25);
-		contentPane.add(callGraph);
-
-		JButton chfile = new JButton("Choose File");
-		chfile.addActionListener(new ActionListener() {
-			@SuppressWarnings("resource")
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-		        int returnValue = fileChooser.showOpenDialog(null);
-		        if (returnValue == JFileChooser.APPROVE_OPTION) {
-			        selectedFile = fileChooser.getSelectedFile();
-			        
-			        try {
-						String content = new Scanner(selectedFile).useDelimiter("\\Z").next();
-						txtrCodeGoesHere.setText(content);
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-		      	}
-			}
-		});
-		chfile.setBounds(1150, 12, 134, 25);
-		contentPane.add(chfile);
+		JPanel buttonsPane = new JPanel();
+		optionsPane.add(buttonsPane, BorderLayout.EAST);
+		
+		JButton button = new JButton("Call Graph");
+		buttonsPane.add(button);
+		
+		JButton button_1 = new JButton("Choose File");
+		buttonsPane.add(button_1);
+		
+		JPanel varPane = new JPanel();
+		optionsPane.add(varPane, BorderLayout.WEST);
+		
+		JLabel label = new JLabel("Variable:");
+		varPane.add(label);
+		label.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		JComboBox<Object> comboBox = new JComboBox<Object>();
+		varPane.add(comboBox);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		graphPane.add(panel);
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JGraph graph = new JGraph((GraphModel) null);
+		graph.setGridVisible(true);
+		graph.setGridEnabled(true);
+		graph.setPreferredSize(new Dimension(931, 679));
+		panel.add(graph);
 		
 		//FINALIZE THE FRAME
 		frame.pack();
@@ -172,16 +156,6 @@ public class mainframe extends JFrame {
 	}
 
 	private void resetGraph() {
-		JGraph jgraph = getJgraph();
-        
-		graphpanel.removeAll();
-		
-		graphpanel.add(jgraph);
-		
-		jgraph.setPreferredSize(new Dimension((int) graphpanel.getSize().getWidth() - 10, (int) (graphpanel.getSize().getHeight() - 10)));
-		
-		graphpanel.repaint();
-		graphpanel.revalidate();
 	}
 
 	private void createGraph() {
@@ -191,25 +165,17 @@ public class mainframe extends JFrame {
 	}
 	
 	private JGraph getJgraph() {
-		// create a JGraphT graph
-	    ListenableGraph<String, DefaultEdge> g = new ListenableDirectedGraph<String, DefaultEdge>(hrefGraph);
-	    // create a visualization using JGraph, via the adapter
+	    ListenableGraph<String, DefaultEdge> g = new ListenableDirectedGraph<String, DefaultEdge>(hrefGraph);		
 	    JGraph jgraph = new JGraph(new JGraphModelAdapter<String, DefaultEdge>(g));
-	    	    
-	 // Let's see if we can lay it out
+	    
+		// Let's see if we can lay it out
 	    JGraphFacade jgf = new JGraphFacade(jgraph);
 	    JGraphFastOrganicLayout layoutifier = new JGraphFastOrganicLayout();
 	    layoutifier.run(jgf);
 	    System.out.println("Layout complete");
 
 	    final Map<?, ?> nestedMap = jgf.createNestedMap(true, true);
-	    jgraph.getGraphLayoutCache().edit(nestedMap);
-	    
-	    jgraph.getGraphLayoutCache().update();
-	    jgraph.refresh();
 	    
 	    return jgraph;
 	}
-
-
 }
