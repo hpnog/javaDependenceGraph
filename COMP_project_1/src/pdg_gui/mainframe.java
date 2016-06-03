@@ -2,7 +2,6 @@ package pdg_gui;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,21 +27,18 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 import org.jgraph.*;
 
 import com.github.javaparser.ParseException;
 import com.jgraph.layout.JGraphFacade;
-import com.jgraph.layout.organic.JGraphFastOrganicLayout;
-
+import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import pdg.PDGCore;
-import org.jgraph.graph.GraphModel;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.Cursor;
+import java.awt.Frame;
 
 public class mainframe extends JFrame {
 	
@@ -52,12 +48,12 @@ public class mainframe extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private File selectedFile;
-	
-	DirectedGraph<String, DefaultEdge> hrefGraph;
-    
+	DirectedGraph<String, RelationshipEdge> hrefGraph;
 	private PDGCore astprinter = new PDGCore();
 	
 	private JPanel contentPane;
+	private JPanel panel;
+	
 
 	/**
 	 * Launch the application.
@@ -81,6 +77,7 @@ public class mainframe extends JFrame {
 	 */
 	public mainframe() {
 		final JFrame frame = new JFrame();
+		frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 		frame.setMinimumSize(new Dimension(1000, 400));
 		frame.setPreferredSize(new Dimension(1300, 800));
 		frame.setTitle("Java PDG Generator");
@@ -139,16 +136,46 @@ public class mainframe extends JFrame {
 		JComboBox<Object> comboBox = new JComboBox<Object>();
 		varPane.add(comboBox);
 		
-		JPanel panel = new JPanel();
+		panel = new JPanel();
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		graphPane.add(panel);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		JGraph graph = new JGraph((GraphModel) null);
+		JGraph graph = getJgraph();
 		graph.setGridVisible(true);
 		graph.setGridEnabled(true);
 		graph.setPreferredSize(new Dimension(931, 679));
 		panel.add(graph);
+		
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					hrefGraph.addVertex("Entry");
+					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, "Entry");			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
+		        				
+				updateGraph();
+			}
+		});
+		
+		button_1.addActionListener(new ActionListener() {
+			@SuppressWarnings("resource")
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+		        int returnValue = fileChooser.showOpenDialog(null);
+		        if (returnValue == JFileChooser.APPROVE_OPTION) {
+			        selectedFile = fileChooser.getSelectedFile();
+			        
+			        try {
+						String content = new Scanner(selectedFile).useDelimiter("\\Z").next();
+						txtrCodeGoesHere.setText(content);
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+		      	}
+			}
+		});
 		
 		//FINALIZE THE FRAME
 		frame.pack();
@@ -159,23 +186,46 @@ public class mainframe extends JFrame {
 	}
 
 	private void createGraph() {
-		hrefGraph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
-		String program = "Program";
-		hrefGraph.addVertex(program);
+		hrefGraph = new DefaultDirectedGraph<String, RelationshipEdge>(RelationshipEdge.class);
 	}
 	
 	private JGraph getJgraph() {
-	    ListenableGraph<String, DefaultEdge> g = new ListenableDirectedGraph<String, DefaultEdge>(hrefGraph);		
-	    JGraph jgraph = new JGraph(new JGraphModelAdapter<String, DefaultEdge>(g));
+	    ListenableGraph<String, RelationshipEdge> g = new ListenableDirectedGraph<String, RelationshipEdge>(hrefGraph);	
+	    	    
+	    JGraph jgraph = new JGraph(new JGraphModelAdapter<String, RelationshipEdge>(g));
+	    jgraph.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+	    jgraph.setVolatileOffscreen(true);
+	    	    
+	    JGraphFacade facade = new JGraphFacade(jgraph);
 	    
-		// Let's see if we can lay it out
-	    JGraphFacade jgf = new JGraphFacade(jgraph);
-	    JGraphFastOrganicLayout layoutifier = new JGraphFastOrganicLayout();
-	    layoutifier.run(jgf);
+	    facade.setIgnoresUnconnectedCells(false);
+	    JGraphHierarchicalLayout layout = new JGraphHierarchicalLayout();
+	    layout.setOrientation(SwingConstants.NORTH);
+	    layout.setIntraCellSpacing(100.0);
+	    layout.setLayoutFromSinks(false);
+	    layout.run(facade);
+	    Map<?, ?> nested = facade.createNestedMap(true, true);
+	    if (nested != null)
+	        jgraph.getGraphLayoutCache().edit(nested);
+
 	    System.out.println("Layout complete");
 
-	    final Map<?, ?> nestedMap = jgf.createNestedMap(true, true);
 	    
+	    	    
 	    return jgraph;
+	}
+	
+	private void updateGraph() {
+		JGraph graph = getJgraph();
+		graph.setGridVisible(true);
+		graph.setGridEnabled(true);
+		graph.setAutoResizeGraph(true);
+		graph.setPreferredSize(new Dimension(931, 679));
+		panel.removeAll();
+		
+		panel.add(graph);
+		
+		panel.revalidate();
+		panel.repaint();
 	}
 }
