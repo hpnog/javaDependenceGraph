@@ -363,7 +363,7 @@ public class SymbolTable {
 							varfound=true;
 					}
 					
-					if(lastScope.getClass().equals(LoopScope.class)){
+					if(lastScope.getClass()==LoopScope.class){
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
 						if(lastMethod.localVarTable.containsKey(child.toString()))
@@ -435,7 +435,7 @@ public class SymbolTable {
 	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
 			GraphNode previousNode, boolean loop) {
 		GraphNode nodeToSend;			
-		GraphNode newNode = new GraphNode("[" + node.getBeginLine() + "] " + node.toString());
+		GraphNode newNode = new GraphNode(node.getBeginLine(), node.toString());
 		hrefGraph.addVertex(newNode);
 		nodeToSend = newNode;
 		hrefGraph.addEdge(previousNode, newNode);

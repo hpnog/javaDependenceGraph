@@ -8,7 +8,10 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -17,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -25,7 +29,11 @@ import javax.swing.border.EtchedBorder;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.ListenableGraph;
+import org.jgrapht.ext.DOTExporter;
+import org.jgrapht.ext.IntegerNameProvider;
 import org.jgrapht.ext.JGraphModelAdapter;
+import org.jgrapht.ext.StringEdgeNameProvider;
+import org.jgrapht.ext.StringNameProvider;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
@@ -130,6 +138,9 @@ public class mainframe extends JFrame {
 		JButton button_1 = new JButton("Choose File");
 		buttonsPane.add(button_1);
 		
+		JButton btnExportTodot = new JButton("Export to .dot file");
+		buttonsPane.add(btnExportTodot);
+		
 		JPanel varPane = new JPanel();
 		optionsPane.add(varPane, BorderLayout.WEST);
 		
@@ -157,7 +168,7 @@ public class mainframe extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					createGraph();
-					GraphNode gn = new GraphNode("Entry");
+					GraphNode gn = new GraphNode(0, "Entry");
 					hrefGraph.addVertex(gn);
 					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, gn);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
@@ -182,6 +193,28 @@ public class mainframe extends JFrame {
 						e1.printStackTrace();
 					}
 		      	}
+			}
+		});
+		
+		btnExportTodot.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				File file = new File("attepmt.dot");
+				FileOutputStream out;
+				try {
+					GraphNode.exporting = true;
+					String filename = JOptionPane.showInputDialog(frame, "What name do you want to give the file (must write .dot)?");
+					out = new FileOutputStream("dotOutputs/" + filename);
+					DOTExporter<GraphNode, RelationshipEdge> exporter = new DOTExporter<GraphNode, RelationshipEdge>(
+							new StringNameProvider<GraphNode>(), null,
+							new StringEdgeNameProvider<RelationshipEdge>());
+					exporter.export(new OutputStreamWriter(out), hrefGraph);
+					out.close();
+					JOptionPane.showMessageDialog(frame, "File saved in 'dotOutpus' folder as " + filename);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				GraphNode.exporting = false;
 			}
 		});
 		

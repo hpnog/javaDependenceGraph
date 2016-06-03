@@ -2,14 +2,19 @@ package graphStructures;
 
 public class GraphNode extends Object {
 	private String info;
+	private int id;
+	public static boolean exporting = false;
 	
-	public GraphNode(String string) {
+	public GraphNode(int id, String string) {
 		this.info = string;
+		this.id = id;
 	}
 	
 	@Override
 	public String toString() {
-		return this.info;
+		if(!exporting)
+			return ("[" + this.id + "] " + this.info);
+		return "Line_" + this.id;
 	}
 	
 	@Override
