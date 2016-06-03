@@ -150,6 +150,7 @@ public class mainframe extends JFrame {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
+					createGraph();
 					hrefGraph.addVertex("Entry");
 					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, "Entry");			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 				} catch (ParseException | IOException e1) {	e1.printStackTrace();}

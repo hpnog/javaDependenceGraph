@@ -1,14 +1,20 @@
 
 public class test {
 	int main() {
-		int sum = 0;
+		int n = 0;
 		int i = 1;
-		while(i < 11) {
-			sum = sum + i;
+		int sum = 0;
+		while(i <= n){
+			sum = 0;
+			int j = 1;
+			while(j <= i){
+				sum = sum + j;
+				j = j + 1;
+			}
+			System.out.println(sum + i);
 			i = i + 1;
 		}
-		System.out.println(sum);
-		System.out.println(i);
-		return 0;
+		System.out.println(sum + i);
+		return i;
 	}
 }

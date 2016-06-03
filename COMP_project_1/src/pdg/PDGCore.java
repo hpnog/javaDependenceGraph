@@ -20,6 +20,7 @@ public class PDGCore {
 	private static FileInputStream in;
 	private SymbolTable st;
 	
+	
 	public PDGCore() {	}
 	
 	public void addFile(FileInputStream inArg, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode) throws ParseException, IOException {
@@ -35,9 +36,10 @@ public class PDGCore {
 		st= new SymbolTable();
 		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
 		CodeVisitor cv = new CodeVisitor();
-		cv.astPrint(cu);
-		cv.semanticAnalysis(cu,st);
-		cv.buildGraph(cu,hrefGraph,previousNode,st);
+		//cv.astPrint(cu);
+		
+		cv.semanticAnalysis(cu,st, hrefGraph, "Entry");
+		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st.printSymbolTable();
 		
 		
@@ -57,16 +59,23 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st){
+    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode){
     		String error;
+    		String nextNode = previousNode;
     		
     		if(relevant(node)) {
-        		if((error=st.SemanticNodeCheck(node))!="clear") 		
-    			errorlist.add(error);
+    			error=st.SemanticNodeCheck(node, hrefGraph, previousNode);
+    			String toCheckError = error.substring(0, 5);
+        		if(!toCheckError.equals("clear")) {	
+        			errorlist.add(error);
+        		}
+        		else {
+        			nextNode = error.substring(5);
+        		}
     		}
- 
+    		
     		for(Node child: node.getChildrenNodes()){
-    			semanticAnalysis(child,st);
+    			semanticAnalysis(child,st, hrefGraph, nextNode);
     		}
     		
     		return errorlist;

@@ -3,12 +3,16 @@ package pdg;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import org.jgrapht.DirectedGraph;
+
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+
+import pdg_gui.RelationshipEdge;
 
 public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
@@ -221,13 +225,18 @@ public class SymbolTable {
 		return false;
 	}
 	
-	public String SemanticNodeCheck(Node node) {
+	public String SemanticNodeCheck(Node node, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode) {
+		String nodeToSend = null;
 		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
 			fillClassScope(node,classScp);
 			if(!addClassScope(classScp))
 				return "error:repeated class/interface declaration of "+classScp.Name+" ";
+			
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
 		}    		
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
@@ -235,45 +244,73 @@ public class SymbolTable {
 			fillMethodScope(node,methodScp);
 			if(!addMethodScope(methodScp))
 				return "error:repeated method declaration of "+methodScp.Name+", please use different identifiers for methods in same class";
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.Parameter.class)){
 			Parameter param = new Parameter();
 			if(!addParameter(node,param))
-				return "error: duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"";	
+				return "error: duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"";
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			Variable var = new Variable();
 			if(!addVariable(node,var))
-				return "error: duplicated variable declaration: "+var.varName+" in Method:"+lastMethod.Name+"";	
+				return "error: duplicated variable declaration: "+var.varName+" in Method:"+lastMethod.Name+"";
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.body.FieldDeclaration.class)) {
 			Field fld= new Field();
 			if(!addField(node,fld))
-				return "error: duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"";	
+				return "error: duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"";
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.ForStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
+			
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
+			
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
+			
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
+			
 			//if not null, it's not an user defined method
 			if(((MethodCallExpr)node).getScope()==null){
 				boolean varfound=false;
@@ -328,7 +365,7 @@ public class SymbolTable {
 			//FIELD will get me the actual field
 			System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
 		}
-		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
 			boolean varfound=false;			
 			for(Node child: node.getChildrenNodes()){			
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
@@ -350,6 +387,10 @@ public class SymbolTable {
 					
 					if(!varfound){
 						return "error:Variable with identifier "+child.toString()+" is undefined";
+					} else {
+						hrefGraph.addVertex(node.toString());
+						nodeToSend = node.toString();
+						hrefGraph.addEdge(previousNode, node.toString());
 					}
 				
 				}
@@ -357,9 +398,14 @@ public class SymbolTable {
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
+			hrefGraph.addVertex(node.toString());
+			nodeToSend = node.toString();
+			hrefGraph.addEdge(previousNode, node.toString());
+			
 			int i=0;
 			boolean varfound = false;
-			for(Node child: node.getChildrenNodes()){			
+			for(Node child: node.getChildrenNodes()){
+				
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 					if(lastMethod.paramTable.containsKey(child.toString())){
 						if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
@@ -399,7 +445,7 @@ public class SymbolTable {
 				}
 			}
 		}
-		return "clear";
+		return "clear" + nodeToSend;
 	}
 
 }
