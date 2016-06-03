@@ -34,6 +34,9 @@ import org.jgraph.*;
 import com.github.javaparser.ParseException;
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
+
+import graphStructures.GraphNode;
+import graphStructures.RelationshipEdge;
 import pdg.PDGCore;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
@@ -48,11 +51,12 @@ public class mainframe extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private File selectedFile;
-	DirectedGraph<String, RelationshipEdge> hrefGraph;
+	DirectedGraph<GraphNode, RelationshipEdge> hrefGraph;
 	private PDGCore astprinter = new PDGCore();
 	
 	private JPanel contentPane;
 	private JPanel panel;
+	private JScrollPane graphScroll;
 	
 
 	/**
@@ -105,7 +109,7 @@ public class mainframe extends JFrame {
 		txtrCodeGoesHere.setEditable(false);
 		txtrCodeGoesHere.setBorder(codepanel.getBorder());
 		JScrollPane scroll = new JScrollPane(txtrCodeGoesHere, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		scroll.setPreferredSize(new Dimension(400, 725));
+		scroll.setPreferredSize(new Dimension(300, 725));
 		codepanel.add(scroll);
 		txtrCodeGoesHere.setText("Code goes here");		
 		
@@ -144,15 +148,18 @@ public class mainframe extends JFrame {
 		JGraph graph = getJgraph();
 		graph.setGridVisible(true);
 		graph.setGridEnabled(true);
-		graph.setPreferredSize(new Dimension(931, 679));
-		panel.add(graph);
+		
+		graphScroll = new JScrollPane(graph, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		
+		panel.add(graphScroll);
 		
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					createGraph();
-					hrefGraph.addVertex("Entry");
-					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, "Entry");			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+					GraphNode gn = new GraphNode("Entry");
+					hrefGraph.addVertex(gn);
+					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, gn);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
 				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
 		        				
 				updateGraph();
@@ -187,13 +194,14 @@ public class mainframe extends JFrame {
 	}
 
 	private void createGraph() {
-		hrefGraph = new DefaultDirectedGraph<String, RelationshipEdge>(RelationshipEdge.class);
+		hrefGraph = new DefaultDirectedGraph<GraphNode, RelationshipEdge>(RelationshipEdge.class);
 	}
 	
 	private JGraph getJgraph() {
-	    ListenableGraph<String, RelationshipEdge> g = new ListenableDirectedGraph<String, RelationshipEdge>(hrefGraph);	
+	    ListenableGraph<GraphNode, RelationshipEdge> g = new ListenableDirectedGraph<GraphNode, RelationshipEdge>(hrefGraph);	
 	    	    
-	    JGraph jgraph = new JGraph(new JGraphModelAdapter<String, RelationshipEdge>(g));
+	    JGraph jgraph = new JGraph(new JGraphModelAdapter<GraphNode, RelationshipEdge>(g));
+	    jgraph.setDragEnabled(true);
 	    jgraph.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	    jgraph.setVolatileOffscreen(true);
 	    	    
@@ -202,7 +210,7 @@ public class mainframe extends JFrame {
 	    facade.setIgnoresUnconnectedCells(false);
 	    JGraphHierarchicalLayout layout = new JGraphHierarchicalLayout();
 	    layout.setOrientation(SwingConstants.NORTH);
-	    layout.setIntraCellSpacing(100.0);
+	    layout.setIntraCellSpacing(20.0);
 	    layout.setLayoutFromSinks(false);
 	    layout.run(facade);
 	    Map<?, ?> nested = facade.createNestedMap(true, true);
@@ -221,10 +229,10 @@ public class mainframe extends JFrame {
 		graph.setGridVisible(true);
 		graph.setGridEnabled(true);
 		graph.setAutoResizeGraph(true);
-		graph.setPreferredSize(new Dimension(931, 679));
 		panel.removeAll();
 		
-		panel.add(graph);
+		graphScroll = new JScrollPane(graph, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		panel.add(graphScroll);
 		
 		panel.revalidate();
 		panel.repaint();

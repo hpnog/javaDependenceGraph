@@ -14,7 +14,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import pdg_gui.RelationshipEdge;
+import graphStructures.GraphNode;
+import graphStructures.RelationshipEdge;
+import graphStructures.ReturnObject;
 
 public class PDGCore {
 	private static FileInputStream in;
@@ -23,7 +25,7 @@ public class PDGCore {
 	
 	public PDGCore() {	}
 	
-	public void addFile(FileInputStream inArg, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode) throws ParseException, IOException {
+	public void addFile(FileInputStream inArg, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode) throws ParseException, IOException {
 		in = inArg;
 		CompilationUnit cu;
 		try {
@@ -38,7 +40,7 @@ public class PDGCore {
 		CodeVisitor cv = new CodeVisitor();
 		//cv.astPrint(cu);
 		
-		cv.semanticAnalysis(cu,st, hrefGraph, "Entry");
+		cv.semanticAnalysis(cu,st, hrefGraph, previousNode);
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st.printSymbolTable();
 		
@@ -59,18 +61,19 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode){
+    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode){
     		String error;
-    		String nextNode = previousNode;
+    		
+    		ReturnObject ret = null;
+    		GraphNode nextNode = previousNode;
     		
     		if(relevant(node)) {
-    			error=st.SemanticNodeCheck(node, hrefGraph, previousNode);
-    			String toCheckError = error.substring(0, 5);
-        		if(!toCheckError.equals("clear")) {	
-        			errorlist.add(error);
+    			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode);
+        		if(ret.hasError()) {	
+        			errorlist.add(ret.getError());
         		}
         		else {
-        			nextNode = error.substring(5);
+        			nextNode = ret.getGraphNode();
         		}
     		}
     		

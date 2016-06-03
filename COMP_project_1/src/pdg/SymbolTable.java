@@ -12,7 +12,9 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 
-import pdg_gui.RelationshipEdge;
+import graphStructures.GraphNode;
+import graphStructures.RelationshipEdge;
+import graphStructures.ReturnObject;
 
 public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
@@ -225,55 +227,47 @@ public class SymbolTable {
 		return false;
 	}
 	
-	public String SemanticNodeCheck(Node node, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode) {
-		String nodeToSend = null;
+	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode) {
+		GraphNode nodeToSend = null;
 		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
 			fillClassScope(node,classScp);
 			if(!addClassScope(classScp))
-				return "error:repeated class/interface declaration of "+classScp.Name+" ";
+				return new ReturnObject("error:repeated class/interface declaration of "+classScp.Name+" ");
 			
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false); 
 		}    		
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
 			MethodScope methodScp = new MethodScope();
 			fillMethodScope(node,methodScp);
 			if(!addMethodScope(methodScp))
-				return "error:repeated method declaration of "+methodScp.Name+", please use different identifiers for methods in same class";
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+				return  new ReturnObject("error:repeated method declaration of "+methodScp.Name+", please use different identifiers for methods in same class");
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.body.Parameter.class)){
 			Parameter param = new Parameter();
 			if(!addParameter(node,param))
-				return "error: duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"";
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());	
+				return  new ReturnObject("error: duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"");
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			Variable var = new Variable();
 			if(!addVariable(node,var))
-				return "error: duplicated variable declaration: "+var.varName+" in Method:"+lastMethod.Name+"";
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());	
+				return  new ReturnObject("error: duplicated variable declaration: "+var.varName+" in Method:"+lastMethod.Name+"");
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.body.FieldDeclaration.class)) {
 			Field fld= new Field();
 			if(!addField(node,fld))
-				return "error: duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"";
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());	
+				return  new ReturnObject("error: duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"");
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.ForStmt.class)) {
@@ -281,9 +275,7 @@ public class SymbolTable {
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
 			
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
@@ -291,9 +283,7 @@ public class SymbolTable {
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
 			
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
@@ -301,15 +291,12 @@ public class SymbolTable {
 			fillLoopScope(node,loopScp);
 			addLoopScope(loopScp);
 			
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			
 			//if not null, it's not an user defined method
 			if(((MethodCallExpr)node).getScope()==null){
@@ -367,7 +354,7 @@ public class SymbolTable {
 		}
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
 			boolean varfound=false;			
-			for(Node child: node.getChildrenNodes()){			
+			for(Node child: node.getChildrenNodes()){
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 					if(lastScope.getClass()==MethodScope.class){
 						if(lastMethod.paramTable.containsKey(child.toString()))
@@ -376,7 +363,7 @@ public class SymbolTable {
 							varfound=true;
 					}
 					
-					if(lastScope.getClass()==LoopScope.class){
+					if(lastScope.getClass().equals(LoopScope.class)){
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
 						if(lastMethod.localVarTable.containsKey(child.toString()))
@@ -386,11 +373,9 @@ public class SymbolTable {
 						}
 					
 					if(!varfound){
-						return "error:Variable with identifier "+child.toString()+" is undefined";
+						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
 					} else {
-						hrefGraph.addVertex(node.toString());
-						nodeToSend = node.toString();
-						hrefGraph.addEdge(previousNode, node.toString());
+						nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 					}
 				
 				}
@@ -398,9 +383,8 @@ public class SymbolTable {
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
-			hrefGraph.addVertex(node.toString());
-			nodeToSend = node.toString();
-			hrefGraph.addEdge(previousNode, node.toString());
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			
 			int i=0;
 			boolean varfound = false;
@@ -410,18 +394,18 @@ public class SymbolTable {
 					if(lastMethod.paramTable.containsKey(child.toString())){
 						if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
 
-							return "error:Type of return value -"+lastMethod.paramTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
+							return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
 						}
 						varfound=true;
 					}
 					if(lastMethod.localVarTable.containsKey(child.toString())){
 						if(!lastMethod.localVarTable.get(child.toString()).equals(lastMethod.Type)){
-							return "error:Type of return value -"+lastMethod.localVarTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
+							return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
 						}
 						varfound=true;
 					}
 					if(!varfound){
-						return "error:Variable with identifier "+child.toString()+" is undefined";
+						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
 					}
 				}
 				else if(child.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
@@ -430,12 +414,12 @@ public class SymbolTable {
 							if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 								if(lastMethod.paramTable.containsKey(child2.toString())){
 									if(!lastMethod.paramTable.get(child2.toString()).equals(lastMethod.Type)){
-										return "error:Type of return value -"+lastMethod.paramTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
+										return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
 									}
 								}
 								if(lastMethod.localVarTable.containsKey(child2.toString())){
 									if(!lastMethod.localVarTable.get(child2.toString()).equals(lastMethod.Type)){	
-										return "error:Type of return value -"+lastMethod.localVarTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"";
+										return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
 									}
 								}
 							}
@@ -445,7 +429,21 @@ public class SymbolTable {
 				}
 			}
 		}
-		return "clear" + nodeToSend;
+		return new ReturnObject(nodeToSend);
+	}
+
+	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
+			GraphNode previousNode, boolean loop) {
+		GraphNode nodeToSend;			
+		GraphNode newNode = new GraphNode("[" + node.getBeginLine() + "] " + node.toString());
+		hrefGraph.addVertex(newNode);
+		nodeToSend = newNode;
+		hrefGraph.addEdge(previousNode, newNode);
+		
+		if(loop)
+			hrefGraph.addEdge(newNode, newNode);
+		
+		return nodeToSend;
 	}
 
 }

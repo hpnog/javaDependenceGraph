@@ -1,4 +1,4 @@
-package pdg_gui;
+package graphStructures;
 
 import org.jgrapht.graph.DefaultEdge;
 
