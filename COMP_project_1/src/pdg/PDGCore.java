@@ -61,9 +61,7 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode){
-    		String error;
-    		
+    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode){    		
     		ReturnObject ret = null;
     		GraphNode nextNode = previousNode;
     		

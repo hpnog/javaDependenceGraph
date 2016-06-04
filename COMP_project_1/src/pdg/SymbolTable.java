@@ -364,6 +364,8 @@ public class SymbolTable {
 					}
 					
 					if(lastScope.getClass()==LoopScope.class){
+						System.out.println("DEBUG - " + node.toString());
+						
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
 						if(lastMethod.localVarTable.containsKey(child.toString()))
