@@ -115,7 +115,7 @@ public class SymbolTable {
 
 	public void printSymbolTable(){ 
 		for(int i = 0; i < scopes.size(); i++){
-			System.out.println("SCOPE "+ scopes.get(i)+"\n");
+			System.out.println("SCOPE "+ scopes.get(i));
 			if(scopes.get(i).getClass()==ClassScope.class){
 				System.out.println(((ClassScope)scopes.get(i)).fieldTable.toString());	
 				System.out.println(((ClassScope)scopes.get(i)).funcTable.toString());
@@ -444,7 +444,7 @@ public class SymbolTable {
 		return false;
 	}
 	
-	private ArrayList<String> assignExpressionCheck(Node node){
+	private ArrayList<String> assignBinaryExpressionCheck(Node node){
 		boolean varfound=false;
 		ArrayList<String> undeclared = new ArrayList<String>();
 		for(Node child: node.getChildrenNodes()){
@@ -553,6 +553,25 @@ public class SymbolTable {
 				return  new ReturnObject("error:duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"");
 		}
 		
+		else if(node.getClass().equals(com.github.javaparser.ast.stmt.IfStmt.class)){
+			//INSERT GRAPH NODES
+		}
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){
+			ArrayList<String> undeclared=new ArrayList<String>();
+			String returnstring = "error:Variables with identifiers:";
+			undeclared=assignBinaryExpressionCheck(node);
+			System.out.println(undeclared.toString());
+			if(undeclared.size()>0){
+				for(int i=0;i<undeclared.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(undeclared.get(i)+" ");
+					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+					returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				}
+
+				return  new ReturnObject(returnstring);
+			}
+		}
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			Variable var = new Variable();
 			ArrayList<Variable> repeatedOcc = new ArrayList<Variable>();
@@ -648,7 +667,7 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
 			ArrayList<String> undeclared=new ArrayList<String>();
 			String returnstring = "error:Variables with identifiers:";
-			undeclared=assignExpressionCheck(node);
+			undeclared=assignBinaryExpressionCheck(node);
 			System.out.println(undeclared.toString());
 			if(undeclared.size()>0){
 				for(int i=0;i<undeclared.size();i++){

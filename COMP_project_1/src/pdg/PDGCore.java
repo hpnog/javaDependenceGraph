@@ -92,7 +92,8 @@ public class PDGCore {
     		return errorlist;
     	}
     	
-    	void printSemanticErrors() {
+    	ArrayList<String> printSemanticErrors() {
+    		
     		ReturnObject ret = null;
     		//add undefined methods error
     		if(st.pendingMethodDeclarations.size()>0)
@@ -108,7 +109,8 @@ public class PDGCore {
     		for(String error: errorlist){
 				System.out.println(error);
 			}	
-		}
+    		return errorlist;
+    	}
     	
 		
 
