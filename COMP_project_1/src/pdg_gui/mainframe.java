@@ -243,7 +243,7 @@ public class mainframe extends JFrame {
 	    facade.setIgnoresUnconnectedCells(false);
 	    JGraphHierarchicalLayout layout = new JGraphHierarchicalLayout();
 	    layout.setOrientation(SwingConstants.NORTH);
-	    layout.setIntraCellSpacing(20.0);
+	    layout.setIntraCellSpacing(50.0);
 	    layout.setLayoutFromSinks(false);
 	    layout.run(facade);
 	    Map<?, ?> nested = facade.createNestedMap(true, true);

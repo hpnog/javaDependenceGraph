@@ -39,7 +39,7 @@ public class PDGCore {
 		CodeVisitor cv = new CodeVisitor();
 
 		cv.astPrint(cu);
-		cv.semanticAnalysis(cu, hrefGraph, previousNode);
+		cv.semanticAnalysis(cu, hrefGraph, previousNode, new ArrayList<Object>());
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st = cv.st;
 		st.printSymbolTable();
@@ -62,12 +62,15 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode){    		
+    	ArrayList<String> semanticAnalysis(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls){  		
     		ReturnObject ret = null;
     		GraphNode nextNode = previousNode;
+    		ArrayList<Object> lastScopes = new ArrayList<Object>(ls);
     		
     		if(relevant(node)) {
-    			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode);
+    			System.out.println("DEBUG - actual number of scopes: " + lastScopes.size() + " in line: " + node.getBeginLine());
+    			
+    			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode, lastScopes);
         		if(ret.hasError()) {	
         			errorlist.add(ret.getError());
         		}
@@ -77,7 +80,7 @@ public class PDGCore {
     		}
     		
     		for(Node child: node.getChildrenNodes()){
-    			semanticAnalysis(child, hrefGraph, nextNode);
+    			semanticAnalysis(child, hrefGraph, nextNode, lastScopes);
     		}
     		
     			

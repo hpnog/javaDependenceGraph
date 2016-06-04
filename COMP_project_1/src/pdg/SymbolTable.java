@@ -103,9 +103,12 @@ public class SymbolTable {
 		classScp.Type=((ClassOrInterfaceDeclaration)node).getExtends().toString();
 	}
 	
-	private boolean addClassScope(ClassScope cs){ 
+	private boolean addClassScope(ClassScope cs, ArrayList<Object> ls){ 
 		if(!scopes.contains(cs)){
 			scopes.add(cs);
+			
+			ls.add(cs);
+			
 			lastClass = cs;
 			lastScope = cs;
 			return true;
@@ -120,8 +123,11 @@ public class SymbolTable {
 		
 	}
 
-	private void addLoopScope(LoopScope ls){
+	private void addLoopScope(LoopScope ls, ArrayList<Object> ls1){
 			scopes.add(ls);
+			
+			ls1.add(ls);
+			
 			lastLoop = ls;
 			lastScope = ls;
 	}
@@ -133,10 +139,13 @@ public class SymbolTable {
 		methodScp.methodNode = node;
 	}
 	
-	private boolean addMethodScope(MethodScope methodScp){
+	private boolean addMethodScope(MethodScope methodScp, ArrayList<Object> ls){
 		if(!lastClass.funcTable.contains(methodScp.Name)){
 			lastClass.funcTable.put(methodScp.Name, methodScp.Type);
 			scopes.add(methodScp);
+			
+			ls.add(methodScp);
+			
 			lastMethod = methodScp;
 			lastScope = methodScp;
 			return true;
@@ -262,13 +271,13 @@ public class SymbolTable {
 	}
 	*/
 
-	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode) {
+	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls) {
 		GraphNode nodeToSend = null;
 		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
 			fillClassScope(node,classScp);
-			if(!addClassScope(classScp))
+			if(!addClassScope(classScp, ls))
 				return new ReturnObject("error:repeated class/interface declaration of "+classScp.Name+" ");
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false); 
@@ -278,7 +287,7 @@ public class SymbolTable {
 			MethodScope methodScp = new MethodScope();
 			fillMethodScope(node,methodScp);
 			checkPendingMethods(methodScp);
-			if(!addMethodScope(methodScp))
+			if(!addMethodScope(methodScp, ls))
 				return  new ReturnObject("error:repeated method declaration of "+methodScp.Name+", please use different identifiers for methods in same class");
 
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
@@ -309,7 +318,7 @@ public class SymbolTable {
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.ForStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
-			addLoopScope(loopScp);
+			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
@@ -317,7 +326,7 @@ public class SymbolTable {
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
-			addLoopScope(loopScp);
+			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
@@ -325,7 +334,7 @@ public class SymbolTable {
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
 			LoopScope loopScp = new LoopScope();
 			fillLoopScope(node,loopScp);
-			addLoopScope(loopScp);
+			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
 		}
@@ -406,7 +415,28 @@ public class SymbolTable {
 			boolean varfound=false;			
 			for(Node child: node.getChildrenNodes()){
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					if(lastScope.getClass()==MethodScope.class){
+					for(int i = 0; i < ls.size(); i++) {
+						if(ls.get(i).getClass()==MethodScope.class){
+							if(((MethodScope)ls.get(i)).paramTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+							if(((MethodScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+						}
+						
+						if(ls.get(i).getClass()==LoopScope.class){							
+							if(((LoopScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+						}
+					}
+					
+					
+					/*if(lastScope.getClass()==MethodScope.class){
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
 						if(lastMethod.localVarTable.containsKey(child.toString()))
@@ -422,7 +452,7 @@ public class SymbolTable {
 							varfound=true;
 						if(lastLoop.localVarTable.containsKey(child.toString()))
 							varfound=true;
-						}
+						}*/
 					
 					if(!varfound){
 						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
