@@ -199,7 +199,7 @@ public class SymbolTable {
 	    }
 	}
 	private String verifyMethodArguments(Node node,Method method){
-		System.out.println((((MethodCallExpr)node).toString()));
+		int nrargs=0;
 		MethodScope methodscp=null;
 		//find MethodScope
 		for(int i=0;i<scopes.size();i++){
@@ -221,7 +221,9 @@ public class SymbolTable {
 			if(!((MethodCallExpr)node).getArgs().isEmpty())
 				return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments("+((MethodCallExpr)node).getArgs().size()+" instead of 0)";
 			
-		   
+		if(!methodscp.paramTable.isEmpty())
+			nrargs=methodscp.paramTable.size();
+		
 		System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
 		//TYPE CHECK EACH ARGUMENT 
 		//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
@@ -244,7 +246,7 @@ public class SymbolTable {
 	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName){
 			boolean methodfound=false;
 		   	Method method =new Method(methodName,scope);
-		    //check if this method is defined and determine nr of args
+		    //check if this method is defined
 		   	for(int i = 0; i < scopes.size(); i++){
 				if(scopes.get(i).getClass()==ClassScope.class){
 					if(((ClassScope)scopes.get(i)).Name.equals(scope))
@@ -272,13 +274,11 @@ public class SymbolTable {
 			 	StringTokenizer stok = new StringTokenizer(node.toString(),".");
 			 	boolean methodfound=false;
 			 	String method="";
-			    while(stok.hasMoreTokens()){
 			    method=stok.nextToken();
-			    if(!stok.hasMoreTokens())
-			    break;
-			    }
+			    method=stok.nextToken();
 			    stok= new StringTokenizer(method,"(");
 			    method=stok.nextToken();
+			    System.out.println("METHOD NAME IS"+method);
 			   //ignore system method Calls
 			   if(!((MethodCallExpr)node).getScope().toString().startsWith("System")){
 				   String classScope="";
@@ -453,7 +453,9 @@ public class SymbolTable {
 					varfound=true;
 				else if(lastMethod.localVarTable.containsKey(child.toString()))
 					varfound=true;
-				else for(int i=0;i<scopes.size();i++){
+				else if(lastClass.fieldTable.containsKey(child.toString()))
+					varfound=true;
+				for(int i=0;i<scopes.size();i++){
 					if(scopes.get(i).getClass().equals(LoopScope.class)){
 						if (((LoopScope)scopes.get(i)).MethodName.equals(lastMethod.Name)){
 							if (((LoopScope)scopes.get(i)).ClassName.equals(lastClass.Name)){
@@ -673,11 +675,20 @@ public class SymbolTable {
 		}
 				
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
-			//SCOPE will get me the class Scope of the fieldAccessExpr, check scopes != System 
-			//if SCOPE is this, get current class
-				System.out.println("SCOPE:"+((FieldAccessExpr) node).getScope().toString());
-			//FIELD will get me the actual field
-				System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
+		   String scope;		
+		   if(!((FieldAccessExpr) node).getScope().toString().startsWith("System")){
+			   if(((FieldAccessExpr) node).getScope().toString().startsWith("this"))
+			   scope=lastClass.Name;
+			   else scope=((FieldAccessExpr) node).getScope().toString();
+		   		for(int i = 0; i < scopes.size(); i++){
+		   			if(scopes.get(i).getClass()==ClassScope.class){
+		   				if(((ClassScope)scopes.get(i)).Name.equals(scope))
+		   					if(!((ClassScope)scopes.get(i)).fieldTable.containsKey(((FieldAccessExpr) node).getField()))
+		   						return new ReturnObject("error:Field with identifier "+((FieldAccessExpr) node).getField()+" in Method "+lastMethod.Name+" is not declared");
+							
+		   			}	
+		   		}
+		   }
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
