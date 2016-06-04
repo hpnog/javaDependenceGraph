@@ -8,7 +8,6 @@ import org.jgrapht.DirectedGraph;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 
@@ -43,6 +42,10 @@ public class SymbolTable {
 		Variable(){
 			varName = null;
 			varType = null;
+		}
+		public Variable(String name, String type) {
+			varName=name;
+			varType=type;
 		}
 	}
 	
@@ -181,28 +184,47 @@ public class SymbolTable {
 		return false;
 	}
 	
-	private boolean addVariable(Node node,Variable var){
-		int c=0,i = 0;
-		
+	private ArrayList<Variable> addVariable(Node node,Variable var){
+		int i = 0;
+		int c = 0;
+		ArrayList<Variable> repeatedVars = new ArrayList<Variable>();
 		
 		for(Node child: node.getChildrenNodes()){			
+	
 			if(i == 0){
 				var.varType = child.toString();
-				i++;
 			}
 			
 			if(child.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class))
-				for(Node child2: child.getChildrenNodes()){
+				c=0;
+			for(Node child2: child.getChildrenNodes()){	
+				
+				if(i==1){
 					if(c == 0){
 						var.varName = child2.toString();
 						c++;
 					}
 				}
-				else var.varName = child.toString();
-
-		
+				if(i>1 && child2.getClass().equals(com.github.javaparser.ast.body.VariableDeclaratorId.class)){
+					if(c==0){
+						Variable othervar= new Variable(child2.toString(),var.varType);
+						if(!putVariable(othervar))
+							repeatedVars.add(othervar);
+						c++;	
+					}	
+				}
+			}
+				
+				i++;
+			
 		}
+		System.out.println("VAR NAME:" + var.varName);
+		if(!putVariable(var))
+			repeatedVars.add(var);
+		return repeatedVars;
+	}
 	
+	private boolean putVariable(Variable var){
 		if(lastScope.equals(lastMethod)){
 			if(!lastMethod.localVarTable.containsKey(var.varName)){
 				lastMethod.localVarTable.put(var.varName, var.varType);
@@ -220,6 +242,7 @@ public class SymbolTable {
 		
 		return false;
 	}
+
 	
 	private boolean addField(Node node, Field fld){
 		int i=0,c = 0;
@@ -249,30 +272,15 @@ public class SymbolTable {
 		return false;
 	}
 	
-	/* NOT WORKING
-	private void updateScopes(Node node){
-		if(lastScope instanceof LoopScope){
-			System.out.println("HERE AT LAST: "+node.toString());
-			if(!node.getParentNode().equals(lastLoop.loopNode))
-				System.out.println("Parent: "+node.getParentNode().toString());
-				for(int i = 0; i < scopes.size(); i++){
-					if(scopes.get(i).getClass()==MethodScope.class){
-						if(node.getParentNode().equals(((MethodScope)scopes.get(i)).methodNode))
-						lastScope=(MethodScope) scopes.get(i);
-						lastMethod=(MethodScope) scopes.get(i);
-					}
-					if(scopes.get(i).getClass()==LoopScope.class){
-						if(node.getParentNode().equals(((LoopScope)scopes.get(i)).loopNode))
-						lastScope=(LoopScope) scopes.get(i);
-						lastLoop=(LoopScope) scopes.get(i);
-					}
-				}
-		}
+	private void updateScopes(ArrayList<Object> ls){
+		if(ls.size()!=0)
+		lastScope=ls.get(ls.size()-1);
 	}
-	*/
+
 
 	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls) {
 		GraphNode nodeToSend = null;
+		updateScopes(ls);
 		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
@@ -296,21 +304,30 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.body.Parameter.class)){
 			Parameter param = new Parameter();
 			if(!addParameter(node,param))
-				return  new ReturnObject("error: duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"");
+				return  new ReturnObject("error:duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"");
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			Variable var = new Variable();
-			if(!addVariable(node,var))
-				return  new ReturnObject("error: duplicated variable declaration: "+var.varName+" in Method:"+lastMethod.Name+"");
-
+			ArrayList<Variable> repeatedOcc = new ArrayList<Variable>();
+			repeatedOcc=addVariable(node,var);
+			if(repeatedOcc.size()>0){
+				String returnstring = "error:duplicated variable declarations:";
+				for(int i=0;i<repeatedOcc.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(repeatedOcc.get(i).varName+" ");
+					else returnstring  = returnstring.concat("and " + repeatedOcc.get(i).varName)+ " ";
+				}
+				returnstring = returnstring.concat("in Method:"+lastMethod.Name+"");			
+				return  new ReturnObject(returnstring);
+			}
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);	
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.body.FieldDeclaration.class)) {
 			Field fld= new Field();
 			if(!addField(node,fld))
-				return  new ReturnObject("error: duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"");
+				return  new ReturnObject("error:duplicated fields: "+fld.fieldName+" in class : "+lastClass.Name+"");
 
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);	
 		}
@@ -415,28 +432,8 @@ public class SymbolTable {
 			boolean varfound=false;			
 			for(Node child: node.getChildrenNodes()){
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					for(int i = 0; i < ls.size(); i++) {
-						if(ls.get(i).getClass()==MethodScope.class){
-							if(((MethodScope)ls.get(i)).paramTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-							if(((MethodScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-						}
-						
-						if(ls.get(i).getClass()==LoopScope.class){							
-							if(((LoopScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-						}
-					}
 					
-					
-					/*if(lastScope.getClass()==MethodScope.class){
+					if(lastScope.getClass()==MethodScope.class){
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
 						if(lastMethod.localVarTable.containsKey(child.toString()))
@@ -444,7 +441,7 @@ public class SymbolTable {
 					}
 					
 					if(lastScope.getClass()==LoopScope.class){
-						System.out.println("DEBUG - " + node.toString());
+						System.out.println("DEBUG - " + child.toString());
 						
 						if(lastMethod.paramTable.containsKey(child.toString()))
 							varfound=true;
@@ -452,7 +449,7 @@ public class SymbolTable {
 							varfound=true;
 						if(lastLoop.localVarTable.containsKey(child.toString()))
 							varfound=true;
-						}*/
+					}
 					
 					if(!varfound){
 						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
@@ -514,20 +511,24 @@ public class SymbolTable {
 		return new ReturnObject(nodeToSend);
 	}
 
-	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
-			GraphNode previousNode, boolean loop) {
-		GraphNode nodeToSend;			
-		GraphNode newNode = new GraphNode(node.getBeginLine(), node.toString());
-		hrefGraph.addVertex(newNode);
-		if(previousNode == null)
-			nodeToSend = newNode;
-		nodeToSend = newNode;
-		hrefGraph.addEdge(previousNode, newNode);
-		
-		if(loop)
-			hrefGraph.addEdge(newNode, newNode);
-		
-		return nodeToSend;
-	}
-
+	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, boolean loop) {
+			GraphNode nodeToSend = null;			
+			try{
+				GraphNode newNode = new GraphNode(node.getBeginLine(), node.toString());
+				hrefGraph.addVertex(newNode);
+				if(previousNode == null)
+					nodeToSend = newNode;
+				nodeToSend = newNode;
+				hrefGraph.addEdge(previousNode, newNode);
+			
+				if(loop)
+					hrefGraph.addEdge(newNode, newNode);
+		} catch (Exception e) {
+			System.out.println("ERROR in graph - " + e.getMessage());	
+			e.printStackTrace();
+		}
+			
+			return nodeToSend;
+		}
+	
 }

@@ -43,6 +43,10 @@ public class PDGCore {
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st = cv.st;
 		st.printSymbolTable();
+		//check for errors
+		if(cv.errorlist.size()!=0){
+			cv.printSemanticErrors();
+		}
 	}
 	
 }
@@ -68,8 +72,6 @@ public class PDGCore {
     		ArrayList<Object> lastScopes = new ArrayList<Object>(ls);
     		
     		if(relevant(node)) {
-    			System.out.println("DEBUG - actual number of scopes: " + lastScopes.size() + " in line: " + node.getBeginLine());
-    			
     			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode, lastScopes);
         		if(ret.hasError()) {	
         			errorlist.add(ret.getError());
@@ -88,40 +90,16 @@ public class PDGCore {
     	}
     	
     	void printSemanticErrors() {
+    		//add undefined methods error
     		if(st.pendingMethodDeclarations.size()>0)
     			for(String undeclaredMethod: st.pendingMethodDeclarations)
-    				errorlist.add("Undeclared Method "+undeclaredMethod+"");
+    				errorlist.add("error:Undeclared Method "+undeclaredMethod+"");
     		for(String error: errorlist){
 				System.out.println(error);
 			}	
 		}
     	
-		//GRAPH BUILDING
-    	boolean buildGraph(Node child2, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode, SymbolTable st){ 
-    		//check for errors
-    		if(errorlist.size()!=0){
-    			printSemanticErrors();
-    			return false;
-    		}
-    		
-    		String nextNode = previousNode;
-    		
-    		if(relevant(child2)) {
-    			
-    			if (child2.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)) {
-    				hrefGraph.addVertex(child2.toString());
-    				hrefGraph.addEdge(previousNode, child2.toString());
-    				nextNode = child2.toString();
-    			}
-    			
-    		}	
-    		
-    		for(Node child: child2.getChildrenNodes()){
-      			if(!buildGraph(child, hrefGraph, nextNode, st))
-    				return false;
-    		}
-			return true;
-    	}
+		
 
 		
 		//AST PRINTING
