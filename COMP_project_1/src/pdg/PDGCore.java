@@ -33,13 +33,12 @@ public class PDGCore {
 		    in.close();
 		}
 		
-		st= new SymbolTable();
 		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
 		CodeVisitor cv = new CodeVisitor();
 		cv.astPrint(cu);
-		cv.semanticAnalysis(cu,st);
-		cv.buildGraph(cu,hrefGraph,previousNode,st);
-		st.printSymbolTable();
+		cv.semanticAnalysis(cu);
+		cv.buildGraph(cu,hrefGraph,previousNode);
+		cv.st.printSymbolTable();
 		
 		
 	}
@@ -52,13 +51,16 @@ public class PDGCore {
     class CodeVisitor extends VoidVisitorAdapter<Object> {
     	
     	ArrayList<String> errorlist;
+    	SymbolTable st;
     	
     	CodeVisitor(){
     		errorlist= new ArrayList<String>();
+
+    		st= new SymbolTable();
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node,SymbolTable st){
+    	ArrayList<String> semanticAnalysis(Node node){
     		String error;
     		
     		if(relevant(node)) {
@@ -67,20 +69,24 @@ public class PDGCore {
     		}
  
     		for(Node child: node.getChildrenNodes()){
-    			semanticAnalysis(child,st);
+    			semanticAnalysis(child);
     		}
     		
+    			
     		return errorlist;
     	}
     	
     	void printSemanticErrors() {
+    		if(st.pendingMethodDeclarations.size()>0)
+    			for(String undeclaredMethod: st.pendingMethodDeclarations)
+    				errorlist.add("Undeclared Method "+undeclaredMethod+"");
     		for(String error: errorlist){
 				System.out.println(error);
 			}	
 		}
     	
 		//GRAPH BUILDING
-    	boolean buildGraph(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode, SymbolTable st){ 
+    	boolean buildGraph(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode){ 
     		//check for errors
     		if(errorlist.size()!=0){
     			printSemanticErrors();
@@ -101,7 +107,7 @@ public class PDGCore {
     		
     		
     		for(Node child: child2.getChildrenNodes()){
-      			if(!buildGraph(child, hrefGraph, nextNode, st))
+      			if(!buildGraph(child, hrefGraph, nextNode))
     				return false;
     		}
 			return true;

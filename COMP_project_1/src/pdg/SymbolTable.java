@@ -14,6 +14,8 @@ public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
 	//overall symbol tables can be accessed through here
 	ArrayList<Object> scopes;
+	ArrayList<String> pendingMethodDeclarations;
+
 	private ClassScope lastClass = null;
 	private MethodScope lastMethod = null;
 	private LoopScope lastLoop = null;
@@ -49,6 +51,7 @@ public class SymbolTable {
 	
 	public SymbolTable(){
 		scopes = new ArrayList<Object>();
+		pendingMethodDeclarations = new ArrayList<String>();
 	}
 	
 	private boolean relevant(Node child2) {
@@ -135,6 +138,13 @@ public class SymbolTable {
 		return false;
 	}
 	
+	private void checkPendingMethods(MethodScope methodScp){
+		for(int i=0;i<pendingMethodDeclarations.size();i++){
+			if(methodScp.Name.equals(pendingMethodDeclarations.get(i)))
+					pendingMethodDeclarations.remove(pendingMethodDeclarations.get(i));
+		}
+	}
+	
 	private boolean addParameter(Node node,Parameter param){
 		int i = 0;
 		
@@ -165,8 +175,8 @@ public class SymbolTable {
 				var.varType = child.toString();
 				i++;
 			}
-		
-				if(child.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class))
+			
+			if(child.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class))
 				for(Node child2: child.getChildrenNodes()){
 					if(c == 0){
 						var.varName = child2.toString();
@@ -224,6 +234,7 @@ public class SymbolTable {
 		return false;
 	}
 	
+	/* NOT WORKING
 	private void updateScopes(Node node){
 		if(lastScope instanceof LoopScope){
 			System.out.println("HERE AT LAST: "+node.toString());
@@ -243,7 +254,7 @@ public class SymbolTable {
 				}
 		}
 	}
-	
+	*/
 	public String SemanticNodeCheck(Node node) {
 		//updateScopes(node);
 		
@@ -257,6 +268,7 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.body.MethodDeclaration.class)){
 			MethodScope methodScp = new MethodScope();
 			fillMethodScope(node,methodScp);
+			checkPendingMethods(methodScp);
 			if(!addMethodScope(methodScp))
 				return "error:repeated method declaration of "+methodScp.Name+", please use different identifiers for methods in same class";
 		}
@@ -305,6 +317,7 @@ public class SymbolTable {
 				int nargs= 0;
 			    StringTokenizer stok = new StringTokenizer(node.toString(),"(");
 			    String methodName=stok.nextToken();
+			    System.out.println(methodName);
 			   
 			    //check if this method is defined and determine nr of args
 			    if(!lastClass.funcTable.containsKey(methodName))
@@ -317,7 +330,8 @@ public class SymbolTable {
 				}
 			    else methodfound=true;
 			    if(!methodfound)
-			    	return "Method "+methodName+" is undefined";
+			    	pendingMethodDeclarations.add(methodName);
+			    else{
 				//verify getArgs.size = method.ParamTable.size
 			   
 				System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
@@ -355,6 +369,7 @@ public class SymbolTable {
 	
 				}
 		
+			    }
 			}
 		}
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
