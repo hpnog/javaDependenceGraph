@@ -39,10 +39,36 @@ public class PDGCore {
 		CodeVisitor cv = new CodeVisitor();
 
 		cv.astPrint(cu);
-		cv.semanticAnalysis(cu, hrefGraph, previousNode, new ArrayList<Object>());
+		cv.semanticAnalysis(cu, hrefGraph, previousNode, new ArrayList<Scope>());
+		
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st = cv.st;
-		st.printSymbolTable();
+		st.addDependencies(hrefGraph);
+		//st.printSymbolTable();
+		
+		
+		
+		for(int i = 0; i < st.scopes.size(); i++) {
+			System.out.println("DEBUGATUAL| BEGAN SCOPE - " + st.scopes.get(i).toString());
+			for(int j = 0; j < ((Scope) st.scopes.get(i)).varChanges.size(); j++) {
+				if(((Scope) st.scopes.get(i)).varChanges.get(j).getDeclared())
+					System.out.println(((Scope) st.scopes.get(i)).varChanges.get(j).getVar() + "\t" + ((Scope) st.scopes.get(i)).varChanges.get(j).getGraphNode().toString() + "\tDeclared now");
+				else
+					System.out.println(((Scope) st.scopes.get(i)).varChanges.get(j).getVar() + "\t" + ((Scope) st.scopes.get(i)).varChanges.get(j).getGraphNode().toString());
+			}
+			System.out.println("DEBUGATUAL| ENDED SCOPE - " + st.scopes.get(i).toString());
+		}
+		
+		for(int i = 0; i < st.scopes.size(); i++) {
+			System.out.println("DEBUGATUAL2| BEGAN SCOPE - " + st.scopes.get(i).toString());
+			for(int j = 0; j < ((Scope) st.scopes.get(i)).varAccesses.size(); j++) {
+				if(((Scope) st.scopes.get(i)).varAccesses.get(j).getDeclared())
+					System.out.println(((Scope) st.scopes.get(i)).varAccesses.get(j).getVar() + "\t" + ((Scope) st.scopes.get(i)).varAccesses.get(j).getVar() + "\tDeclared now");
+				else
+					System.out.println(((Scope) st.scopes.get(i)).varAccesses.get(j).getVar() + "\t" + ((Scope) st.scopes.get(i)).varAccesses.get(j).getVar().toString());
+			}
+			System.out.println("DEBUGATUAL2| ENDED SCOPE - " + st.scopes.get(i).toString());
+		}
 	}
 	
 }
@@ -62,13 +88,17 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls){  		
+    	ArrayList<String> semanticAnalysis(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Scope> ls){  		
     		ReturnObject ret = null;
     		GraphNode nextNode = previousNode;
-    		ArrayList<Object> lastScopes = new ArrayList<Object>(ls);
+    		ArrayList<Scope> lastScopes = new ArrayList<Scope>(ls);
+    		
+    		if(ls.size() != 0)
+    			st.lastScope = lastScopes.get(lastScopes.size() - 1);
+
     		
     		if(relevant(node)) {
-    			System.out.println("DEBUG - actual number of scopes: " + lastScopes.size() + " in line: " + node.getBeginLine());
+    			//System.out.println("DEBUG - actual number of scopes: " + lastScopes.size() + " in line: " + node.getBeginLine());
     			
     			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode, lastScopes);
         		if(ret.hasError()) {	

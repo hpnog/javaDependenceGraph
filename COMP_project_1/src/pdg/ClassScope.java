@@ -1,8 +1,11 @@
 package pdg;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class ClassScope {
+import graphStructures.VarChanges;
+
+public class ClassScope extends Scope{
 	String Type;
 	String Name;
 	Hashtable<String,String> fieldTable =  new Hashtable<String, String>();

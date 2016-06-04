@@ -157,8 +157,6 @@ public class mainframe extends JFrame {
 		panel.setLayout(new BorderLayout(0, 0));
 		
 		JGraph graph = getJgraph();
-		graph.setGridVisible(true);
-		graph.setGridEnabled(true);
 		
 		graphScroll = new JScrollPane(graph, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
@@ -234,6 +232,9 @@ public class mainframe extends JFrame {
 	    ListenableGraph<GraphNode, RelationshipEdge> g = new ListenableDirectedGraph<GraphNode, RelationshipEdge>(hrefGraph);	
 	    	    
 	    JGraph jgraph = new JGraph(new JGraphModelAdapter<GraphNode, RelationshipEdge>(g));
+	    jgraph.setGridEnabled(true);
+	    jgraph.setGridVisible(true);
+	    jgraph.setGridSize(10.0);
 	    jgraph.setDragEnabled(true);
 	    jgraph.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	    jgraph.setVolatileOffscreen(true);
@@ -243,7 +244,7 @@ public class mainframe extends JFrame {
 	    facade.setIgnoresUnconnectedCells(false);
 	    JGraphHierarchicalLayout layout = new JGraphHierarchicalLayout();
 	    layout.setOrientation(SwingConstants.NORTH);
-	    layout.setIntraCellSpacing(50.0);
+	    layout.setIntraCellSpacing(150.0);
 	    layout.setLayoutFromSinks(false);
 	    layout.run(facade);
 	    Map<?, ?> nested = facade.createNestedMap(true, true);
@@ -251,16 +252,12 @@ public class mainframe extends JFrame {
 	        jgraph.getGraphLayoutCache().edit(nested);
 
 	    System.out.println("Layout complete");
-
-	    
 	    	    
 	    return jgraph;
 	}
 	
 	private void updateGraph() {
 		JGraph graph = getJgraph();
-		graph.setGridVisible(true);
-		graph.setGridEnabled(true);
 		graph.setAutoResizeGraph(true);
 		panel.removeAll();
 		
