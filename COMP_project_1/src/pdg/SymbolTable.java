@@ -29,7 +29,7 @@ public class SymbolTable {
 	private ClassScope lastClass = null;
 	private MethodScope lastMethod = null;
 	private LoopScope lastLoop = null;
-	private Scope lastScope = null;
+	Scope lastScope = null;
 	class MethodNode{
 		Node method;
 		String classScope;
@@ -657,40 +657,18 @@ public class SymbolTable {
 					if(i==0)
 					returnstring  = returnstring.concat(undeclared.get(i)+" ");
 					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+					returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				}
 
-			boolean varfound=false;			
-			for(Node child: node.getChildrenNodes()){
-				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					for(int i1 = 0; i1 < ls.size(); i1++) {
-						if(ls.get(i1).getClass()==MethodScope.class){
-							if(((MethodScope)ls.get(i1)).paramTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-							if(((MethodScope)ls.get(i1)).localVarTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-						}
-						
-						if(ls.get(i1).getClass()==LoopScope.class){							
-							if(((LoopScope)ls.get(i1)).localVarTable.containsKey(child.toString())) {
-								varfound=true;
-								break;
-							}
-						}
-					}
-					
-					if(!varfound){
-						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
-					} else {
-						nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
-						lastScope.varChanges.add(new VarChanges(nodeToSend, child.toString()));
-					}
-				
-				
-				} else if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-					for(Node childNode : child.getChildrenNodes()) {
+				return  new ReturnObject(returnstring);
+			}
+
+			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
+			lastScope.varChanges.add(new VarChanges(nodeToSend, node.toString()));	
+		
+			for(Node child: node.getChildrenNodes())
+				if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
+					for(Node childNode : node.getChildrenNodes()) {
 						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 
 							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
@@ -704,19 +682,19 @@ public class SymbolTable {
 							}
 						}
 					}
+					nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 				}
-				returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
-				
-				nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
-				
-				return  new ReturnObject(returnstring);
-		}}}else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
+		}	
 
+		 
+				
+		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			ReturnObject returnObject = new ReturnObject("");
 			if((returnObject=checkReturn(node))!=null)
 				return returnObject;
-		
+			
+		}
 		return new ReturnObject(nodeToSend);
 	}
 

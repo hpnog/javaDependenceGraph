@@ -73,11 +73,7 @@ public class PDGCore {
     		ReturnObject ret = null;
     		GraphNode nextNode = previousNode;
     		ArrayList<Scope> lastScopes = new ArrayList<Scope>(ls);
-    		
-    		if(ls.size() != 0)
-    			st.lastScope = lastScopes.get(lastScopes.size() - 1);
-
-    		
+    			
     		if(relevant(node)) {
     			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode, lastScopes);
         		if(ret.hasError()) {	
