@@ -18,6 +18,7 @@ public class SymbolTable {
 	private MethodScope lastMethod = null;
 	private LoopScope lastLoop = null;
 	private Object lastScope = null;
+
 	
 	class Parameter {
 		String paramName;
@@ -106,6 +107,7 @@ public class SymbolTable {
 	private void fillLoopScope(Node node,LoopScope loopScp){
 		loopScp.ClassName = lastClass.Name;
 		loopScp.MethodName = lastMethod.Name;
+		loopScp.loopNode=node;
 		
 	}
 
@@ -119,6 +121,7 @@ public class SymbolTable {
 		methodScp.Type = ((MethodDeclaration)node).getType().toString();
 		methodScp.Name = ((MethodDeclaration)node).getNameExpr().toString();
 		methodScp.className = lastClass.Name;
+		methodScp.methodNode = node;
 	}
 	
 	private boolean addMethodScope(MethodScope methodScp){
@@ -162,7 +165,7 @@ public class SymbolTable {
 				var.varType = child.toString();
 				i++;
 			}
-			if(i==1){
+		
 				if(child.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class))
 				for(Node child2: child.getChildrenNodes()){
 					if(c == 0){
@@ -171,7 +174,7 @@ public class SymbolTable {
 					}
 				}
 				else var.varName = child.toString();
-			}
+
 		
 		}
 	
@@ -221,7 +224,28 @@ public class SymbolTable {
 		return false;
 	}
 	
+	private void updateScopes(Node node){
+		if(lastScope instanceof LoopScope){
+			System.out.println("HERE AT LAST: "+node.toString());
+			if(!node.getParentNode().equals(lastLoop.loopNode))
+				System.out.println("Parent: "+node.getParentNode().toString());
+				for(int i = 0; i < scopes.size(); i++){
+					if(scopes.get(i).getClass()==MethodScope.class){
+						if(node.getParentNode().equals(((MethodScope)scopes.get(i)).methodNode))
+						lastScope=(MethodScope) scopes.get(i);
+						lastMethod=(MethodScope) scopes.get(i);
+					}
+					if(scopes.get(i).getClass()==LoopScope.class){
+						if(node.getParentNode().equals(((LoopScope)scopes.get(i)).loopNode))
+						lastScope=(LoopScope) scopes.get(i);
+						lastLoop=(LoopScope) scopes.get(i);
+					}
+				}
+		}
+	}
+	
 	public String SemanticNodeCheck(Node node) {
+		//updateScopes(node);
 		
 		if(node.getClass().equals(com.github.javaparser.ast.body.ClassOrInterfaceDeclaration.class)){
 			ClassScope classScp = new ClassScope();
@@ -274,14 +298,26 @@ public class SymbolTable {
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){
-			//if not null, it's not an user defined method
+			//if not null, it's not an user defined method(System libs)
 			if(((MethodCallExpr)node).getScope()==null){
 				boolean varfound=false;
+				boolean methodfound=false;
 				int nargs= 0;
 			    StringTokenizer stok = new StringTokenizer(node.toString(),"(");
 			    String methodName=stok.nextToken();
-			    System.out.println(methodName);
+			   
 			    //check if this method is defined and determine nr of args
+			    if(!lastClass.funcTable.containsKey(methodName))
+			    	for(int i = 0; i < scopes.size(); i++){
+					if(scopes.get(i).getClass()==ClassScope.class){
+						if(node.getChildrenNodes().get(0).equals(methodName))
+							methodfound=true;
+					}
+					
+				}
+			    else methodfound=true;
+			    if(!methodfound)
+			    	return "Method "+methodName+" is undefined";
 				//verify getArgs.size = method.ParamTable.size
 			   
 				System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
