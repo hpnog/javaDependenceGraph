@@ -8,25 +8,29 @@ import org.jgrapht.DirectedGraph;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
 
 import graphStructures.GraphNode;
 import graphStructures.RelationshipEdge;
 import graphStructures.ReturnObject;
+import graphStructures.VarChanges;
 
 public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
 	//overall symbol tables can be accessed through here
-	ArrayList<Object> scopes;
+	public ArrayList<Scope> scopes;
 	ArrayList<String> pendingMethodDeclarations;
 
 	private ClassScope lastClass = null;
 	private MethodScope lastMethod = null;
 	private LoopScope lastLoop = null;
-	private Object lastScope = null;
+	public Scope lastScope = null;
 
-	
 	class Parameter {
 		String paramName;
 		String paramType;
@@ -59,7 +63,7 @@ public class SymbolTable {
 	}
 	
 	public SymbolTable(){
-		scopes = new ArrayList<Object>();
+		scopes = new ArrayList<Scope>();
 		pendingMethodDeclarations = new ArrayList<String>();
 	}
 	
@@ -106,7 +110,7 @@ public class SymbolTable {
 		classScp.Type=((ClassOrInterfaceDeclaration)node).getExtends().toString();
 	}
 	
-	private boolean addClassScope(ClassScope cs, ArrayList<Object> ls){ 
+	private boolean addClassScope(ClassScope cs, ArrayList<Scope> ls){ 
 		if(!scopes.contains(cs)){
 			scopes.add(cs);
 			
@@ -114,6 +118,8 @@ public class SymbolTable {
 			
 			lastClass = cs;
 			lastScope = cs;
+			
+			
 			return true;
 		}
 		else return false;
@@ -126,7 +132,7 @@ public class SymbolTable {
 		
 	}
 
-	private void addLoopScope(LoopScope ls, ArrayList<Object> ls1){
+	private void addLoopScope(LoopScope ls, ArrayList<Scope> ls1){
 			scopes.add(ls);
 			
 			ls1.add(ls);
@@ -142,7 +148,7 @@ public class SymbolTable {
 		methodScp.methodNode = node;
 	}
 	
-	private boolean addMethodScope(MethodScope methodScp, ArrayList<Object> ls){
+	private boolean addMethodScope(MethodScope methodScp, ArrayList<Scope> ls){
 		if(!lastClass.funcTable.contains(methodScp.Name)){
 			lastClass.funcTable.put(methodScp.Name, methodScp.Type);
 			scopes.add(methodScp);
@@ -272,13 +278,14 @@ public class SymbolTable {
 		return false;
 	}
 	
-	private void updateScopes(ArrayList<Object> ls){
+	private void updateScopes(ArrayList<Scope> ls){
 		if(ls.size()!=0)
 		lastScope=ls.get(ls.size()-1);
 	}
 
 
-	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls) {
+	
+	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Scope> ls) {
 		GraphNode nodeToSend = null;
 		updateScopes(ls);
 		
@@ -322,6 +329,17 @@ public class SymbolTable {
 				return  new ReturnObject(returnstring);
 			}
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);	
+
+			for(Node child: node.getChildrenNodes()){
+				if(child.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class)) {
+					for(Node childNode : child.getChildrenNodes()){
+						if(childNode.getClass().equals(com.github.javaparser.ast.body.VariableDeclaratorId.class)) {
+							lastScope.varChanges.add(new VarChanges(nodeToSend, childNode.toString(), true));
+						}
+					}
+				}
+			}
+			
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.body.FieldDeclaration.class)) {
@@ -338,6 +356,7 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
@@ -346,6 +365,7 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
@@ -354,10 +374,27 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
-		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
+			for(Node childNode : node.getChildrenNodes()) {
+				if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+					String variable = childNode.toString();
+
+					lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
+					
+					for(int i = scopes.size() - 1; i >= 0; i--) {
+						ArrayList<VarChanges> vc = scopes.get(i).varChanges;
+						for(int j = 0; j < vc.size(); j++) {
+							if(vc.get(j).getVar().equals(variable)) {
+								addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
+							}
+						}
+					}
+				}
+			}
 			
 			//if not null, it's not an user defined method
 			if(((MethodCallExpr)node).getScope()==null){
@@ -366,7 +403,6 @@ public class SymbolTable {
 				int nargs= 0;
 			    StringTokenizer stok = new StringTokenizer(node.toString(),"(");
 			    String methodName=stok.nextToken();
-			    System.out.println(methodName);
 			   
 			    //check if this method is defined and determine nr of args
 			    if(!lastClass.funcTable.containsKey(methodName))
@@ -383,12 +419,12 @@ public class SymbolTable {
 			    else{
 				//verify getArgs.size = method.ParamTable.size
 			   
-				System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
+			    	//System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
 				//TYPE CHECK EACH ARGUMENT 
 				//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
 				for(Node child: node.getChildrenNodes()){
 					
-					System.out.println("CHILD OF METHODCALL"+child.toString());
+						//System.out.println("CHILD OF METHODCALL"+child.toString());
 					
 					//CHECK IF THE NAMEEXPRESSION IS IN THE LIST OF ARGUMENTS ,IF NOT IT IS THE SCOPE(class) OF THE FUNCTION 
 					if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
@@ -424,39 +460,56 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
 			//SCOPE will get me the class Scope of the fieldAccessExpr, check scopes != System 
 			//if SCOPE is this, get current class
-			System.out.println("SCOPE:"+((FieldAccessExpr) node).getScope().toString());
+				System.out.println("SCOPE:"+((FieldAccessExpr) node).getScope().toString());
 			//FIELD will get me the actual field
-			System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
+				System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
 		}
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
 			boolean varfound=false;			
 			for(Node child: node.getChildrenNodes()){
 				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					
-					if(lastScope.getClass()==MethodScope.class){
-						if(lastMethod.paramTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastMethod.localVarTable.containsKey(child.toString()))
-							varfound=true;
-					}
-					
-					if(lastScope.getClass()==LoopScope.class){
-						System.out.println("DEBUG - " + child.toString());
+					for(int i = 0; i < ls.size(); i++) {
+						if(ls.get(i).getClass()==MethodScope.class){
+							if(((MethodScope)ls.get(i)).paramTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+							if(((MethodScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+						}
 						
-						if(lastMethod.paramTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastMethod.localVarTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastLoop.localVarTable.containsKey(child.toString()))
-							varfound=true;
+						if(ls.get(i).getClass()==LoopScope.class){							
+							if(((LoopScope)ls.get(i)).localVarTable.containsKey(child.toString())) {
+								varfound=true;
+								break;
+							}
+						}
 					}
 					
 					if(!varfound){
 						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
 					} else {
 						nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
+						lastScope.varChanges.add(new VarChanges(nodeToSend, child.toString()));
 					}
 				
+				} else if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
+					for(Node childNode : child.getChildrenNodes()) {
+						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+
+							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
+							
+							String variable = childNode.toString();
+							for(int i = scopes.size() - 1; i >= 0; i--) {
+								ArrayList<VarChanges> vc = scopes.get(i).varChanges;
+								for(int j = 0; j < vc.size(); j++)
+									if(vc.get(j).getVar().equals(variable))
+										addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -511,24 +564,81 @@ public class SymbolTable {
 		return new ReturnObject(nodeToSend);
 	}
 
-	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, boolean loop) {
-			GraphNode nodeToSend = null;			
-			try{
-				GraphNode newNode = new GraphNode(node.getBeginLine(), node.toString());
-				hrefGraph.addVertex(newNode);
-				if(previousNode == null)
-					nodeToSend = newNode;
-				nodeToSend = newNode;
-				hrefGraph.addEdge(previousNode, newNode);
-			
-				if(loop)
-					hrefGraph.addEdge(newNode, newNode);
+	private void analyseVariablesInLoop(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
+			GraphNode nodeToSend, LoopScope loopScp) {
+		loopScp.gn = nodeToSend;
+		loopScp.node = node;
+		
+		for(Node child : node.getChildrenNodes())
+			if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)) 
+				for(Node childNode : child.getChildrenNodes())
+					if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+						
+						lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
+						
+						String variable = childNode.toString();
+						for(int i = scopes.size() - 1; i >= 0; i--) {
+							ArrayList<VarChanges> vc = scopes.get(i).varChanges;
+							for(int j = 0; j < vc.size(); j++)
+								if(vc.get(j).getVar().equals(variable))
+									addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
+						}
+					}
+	}
+
+	private void addEdgeBetweenNodes(GraphNode graphNode, GraphNode node, String string, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph) {
+		 try{
+				hrefGraph.addEdge(graphNode, node, new RelationshipEdge(string));
 		} catch (Exception e) {
 			System.out.println("ERROR in graph - " + e.getMessage());	
 			e.printStackTrace();
+		}	
+		return;
+	}
+
+	private GraphNode addNodeAndEdgeToGraph(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
+		GraphNode previousNode, boolean loop) {
+		GraphNode nodeToSend = null;			
+		try{
+			GraphNode newNode = new GraphNode(node.getBeginLine(), node.toString());
+			hrefGraph.addVertex(newNode);
+			if(previousNode == null)
+				nodeToSend = newNode;
+			nodeToSend = newNode;
+			hrefGraph.addEdge(previousNode, newNode);
+		
+			if(loop)
+				hrefGraph.addEdge(newNode, newNode);
+	} catch (Exception e) {
+		System.out.println("ERROR in graph - " + e.getMessage());	
+		e.printStackTrace();
+	}
+		
+		return nodeToSend;
+	}
+
+	public void addDependencies(DirectedGraph<GraphNode,RelationshipEdge> hrefGraph) {
+		for(Scope scope : scopes) {
+			if(scope instanceof LoopScope) {
+				LoopScope ls = (LoopScope) scope;
+				for(Node child : (ls.node.getChildrenNodes())) 
+					if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)) 
+						for(Node childNode : child.getChildrenNodes()) 
+							if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){								
+								String variable = childNode.toString();
+								
+								for(VarChanges vc : ls.varChanges) {
+									if(vc.getVar().equals(variable)) {
+										addEdgeBetweenNodes(vc.getGraphNode(),ls.gn, "FDG", hrefGraph);
+									}
+								}
+							}
+				for(VarChanges va : ls.varAccesses) 
+					for(VarChanges vc : ls.varChanges) 
+						if (va.getVar().equals(vc.getVar())) 
+							addEdgeBetweenNodes(vc.getGraphNode(),va.getGraphNode(), "FDG", hrefGraph);
+			}
 		}
-			
-			return nodeToSend;
-		}
-	
+	}
+
 }
