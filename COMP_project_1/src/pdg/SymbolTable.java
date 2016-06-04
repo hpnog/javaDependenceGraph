@@ -684,19 +684,20 @@ public class SymbolTable {
 					}
 					nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 				}
-		}	
 
-		 
-				
+			}
+			
+	
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			ReturnObject returnObject = new ReturnObject("");
 			if((returnObject=checkReturn(node))!=null)
 				return returnObject;
-			
+			return new ReturnObject(nodeToSend);
 		}
 		return new ReturnObject(nodeToSend);
 	}
+
 
 	private void analyseVariablesInLoop(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
 			GraphNode nodeToSend, LoopScope loopScp) {
