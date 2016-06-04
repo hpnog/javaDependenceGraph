@@ -15,7 +15,7 @@ public class ReturnObject {
 	}
 	
 	public boolean hasError() {
-		return (error != null);
+		return (error != null) && (error!="clear");
 	}
 	
 	public String getError() {

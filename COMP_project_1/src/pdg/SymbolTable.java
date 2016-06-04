@@ -19,14 +19,39 @@ public class SymbolTable {
 	//this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
 	//overall symbol tables can be accessed through here
 	ArrayList<Object> scopes;
-	ArrayList<String> pendingMethodDeclarations;
-
+	ArrayList<Method> pendingMethodDeclarations;
+	ArrayList<MethodNode> pendingMethodNodes;
 	private ClassScope lastClass = null;
 	private MethodScope lastMethod = null;
 	private LoopScope lastLoop = null;
 	private Object lastScope = null;
-
+	class MethodNode{
+		Node method;
+		String classScope;
+		String methodName;
+		MethodNode(){
+			method=null;
+			classScope=null;
+		}
+		public MethodNode(Node node, String classScope2,String name) {
+			method=node;
+			classScope=classScope2;
+			methodName=name;
+		}
 	
+	}
+	class Method{
+		String methodName;
+		String methodScope;
+		Method(){
+			methodName=null;
+			methodScope=null;
+		}
+		Method(String n, String s){
+			methodName=n;
+			methodScope=s;
+		}
+	}
 	class Parameter {
 		String paramName;
 		String paramType;
@@ -60,7 +85,8 @@ public class SymbolTable {
 	
 	public SymbolTable(){
 		scopes = new ArrayList<Object>();
-		pendingMethodDeclarations = new ArrayList<String>();
+		pendingMethodDeclarations = new ArrayList<Method>();
+		pendingMethodNodes = new ArrayList<MethodNode>();
 	}
 	
 	private boolean relevant(Node child2) {
@@ -156,11 +182,149 @@ public class SymbolTable {
 		return false;
 	}
 	
-	private void checkPendingMethods(MethodScope methodScp){
+	private void checkPendingMethods(MethodScope methodScp){ 
 		for(int i=0;i<pendingMethodDeclarations.size();i++){
-			if(methodScp.Name.equals(pendingMethodDeclarations.get(i)))
+			if(methodScp.className.equals(pendingMethodDeclarations.get(i).methodScope))
+				if(methodScp.Name.equals(pendingMethodDeclarations.get(i).methodName)){
 					pendingMethodDeclarations.remove(pendingMethodDeclarations.get(i));
+				}
+	    }
+	}
+	private String verifyMethodArguments(Node node,Method method){
+		System.out.println((((MethodCallExpr)node).toString()));
+		MethodScope methodscp=null;
+		//find MethodScope
+		for(int i=0;i<scopes.size();i++){
+			if(scopes.get(i).getClass().equals(MethodScope.class))
+				if(((MethodScope)scopes.get(i)).className.equals(method.methodScope))
+					if(((MethodScope)scopes.get(i)).Name.equals(method.methodName))
+						methodscp=((MethodScope)scopes.get(i));
 		}
+		if(!((MethodCallExpr)node).getArgs().isEmpty())
+			if(!methodscp.paramTable.isEmpty())	
+				if(((MethodCallExpr)node).getArgs().size()!=methodscp.paramTable.size())
+					return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments("+((MethodCallExpr)node).getArgs().size()+" instead of "+methodscp.paramTable.size()+")";
+			
+		if(((MethodCallExpr)node).getArgs().isEmpty())
+			if(!methodscp.paramTable.isEmpty())
+				return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments(0 instead of "+methodscp.paramTable.size()+")";
+		
+		if(methodscp.paramTable.isEmpty())
+			if(!((MethodCallExpr)node).getArgs().isEmpty())
+				return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments("+((MethodCallExpr)node).getArgs().size()+" instead of 0)";
+			
+		   
+		System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
+		//TYPE CHECK EACH ARGUMENT 
+		//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
+		for(Node child: node.getChildrenNodes()){
+			
+			System.out.println("CHILD OF METHODCALL"+child.toString());
+			
+			//CHECK IF THE NAMEEXPRESSION IS IN THE LIST OF ARGUMENTS ,IF NOT IT IS THE SCOPE(class) OF THE FUNCTION 
+			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+		
+			}
+			//TYPE CHECK A FIELD PASSED AS ARGUMENT, NO NEED TO SEE IF FIELD IS DEFINED
+			if(child.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
+				
+			}
+
+		}
+		return "clear";
+	}
+	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName){
+			boolean methodfound=false;
+		   	Method method =new Method(methodName,scope);
+		    //check if this method is defined and determine nr of args
+		   	for(int i = 0; i < scopes.size(); i++){
+				if(scopes.get(i).getClass()==ClassScope.class){
+					if(((ClassScope)scopes.get(i)).Name.equals(scope))
+						if(((ClassScope)scopes.get(i)).funcTable.containsKey(methodName))
+							methodfound=true;
+				}	
+		    }
+		   
+		    if(!methodfound){
+		    	return new ReturnObject("clear");
+		    }
+		    else{
+		    	String returnval;
+		    	returnval=verifyMethodArguments(node, method);
+		    	if(!returnval.equals("clear"))
+		    		return new ReturnObject(returnval);
+		    }
+		
+		return new ReturnObject("clear");
+	}
+	
+	private ReturnObject processMethodCallNode(Node node){
+		//for function calls of the type object.callfunction()
+		if(((MethodCallExpr)node).getScope()!=null){
+			 	StringTokenizer stok = new StringTokenizer(node.toString(),".");
+			 	boolean methodfound=false;
+			 	String method="";
+			    while(stok.hasMoreTokens()){
+			    method=stok.nextToken();
+			    if(!stok.hasMoreTokens())
+			    break;
+			    }
+			    stok= new StringTokenizer(method,"(");
+			    method=stok.nextToken();
+			   //ignore system method Calls
+			   if(!((MethodCallExpr)node).getScope().toString().startsWith("System")){
+				   String classScope="";
+				   if(((MethodCallExpr)node).getScope().toString().startsWith("this"))
+					   classScope=lastClass.Name;
+				   else classScope=((MethodCallExpr)node).getScope().toString();
+				   Method methodwithscope = new Method(method,classScope);
+				   //check if this method is defined and determine nr of args
+				    	for(int i = 0; i < scopes.size(); i++){
+						if(scopes.get(i).getClass()==ClassScope.class){
+							if(((ClassScope)scopes.get(i)).Name.equals(classScope))
+								if(((ClassScope)scopes.get(i)).funcTable.containsKey(method))
+									methodfound=true;
+						}	
+				    	}
+				    	if(!methodfound){
+				    		pendingMethodDeclarations.add(methodwithscope);
+				    		pendingMethodNodes.add(new MethodNode(node,classScope,method));
+				    	}
+				    	else{
+				    		String returnval;
+					    	returnval=verifyMethodArguments(node, methodwithscope);
+					    	if(!returnval.equals("clear"))
+					    		return new ReturnObject(returnval);
+				    	}
+			   
+			   }
+		}
+		
+		//if not null, it's not an user defined method of current Class scope
+		if(((MethodCallExpr)node).getScope()==null){
+			boolean varfound=false;
+			boolean methodfound=false;
+			int nargs= 0;
+		    StringTokenizer stok = new StringTokenizer(node.toString(),"(");
+		    String methodName=stok.nextToken();
+		    System.out.println(methodName);
+		   	Method method =new Method(methodName,lastClass.Name);
+		    //check if this method is defined and determine nr of args
+		    if(lastClass.funcTable.containsKey(methodName))
+		    	methodfound=true;
+		   
+		    if(!methodfound){
+		    	pendingMethodDeclarations.add(method);
+		    	pendingMethodNodes.add(new MethodNode(node,lastClass.Name,methodName));
+		    }
+		    else{
+		    	String returnval;
+		    	returnval=verifyMethodArguments(node, method);
+		    	if(!returnval.equals("clear"))
+		    		return new ReturnObject(returnval);
+		    }
+		}
+		return new ReturnObject("clear");
 	}
 	
 	private boolean addParameter(Node node,Parameter param){
@@ -218,7 +382,7 @@ public class SymbolTable {
 				i++;
 			
 		}
-		System.out.println("VAR NAME:" + var.varName);
+
 		if(!putVariable(var))
 			repeatedVars.add(var);
 		return repeatedVars;
@@ -272,12 +436,89 @@ public class SymbolTable {
 		return false;
 	}
 	
+	private ArrayList<String> assignExpressionCheck(Node node){
+		boolean varfound=false;
+		ArrayList<String> undeclared = new ArrayList<String>();
+		for(Node child: node.getChildrenNodes()){
+			System.out.println("CHILD OF ASSIGN"+child.toString()+child.getClass().toString());
+			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+				System.out.println("VARIABLE"+child.toString());
+				if(lastMethod.paramTable.containsKey(child.toString()))
+					varfound=true;
+				else if(lastMethod.localVarTable.containsKey(child.toString()))
+					varfound=true;
+				else for(int i=0;i<scopes.size();i++){
+					if(scopes.getClass().equals(LoopScope.class)){
+						if (((LoopScope)scopes.get(i)).MethodName.equals(lastMethod.Name)){
+							if (((LoopScope)scopes.get(i)).ClassName.equals(lastClass.Name)){
+								if(((LoopScope)scopes.get(i)).localVarTable.containsKey(child.toString()))
+									varfound=true;
+							}
+						}
+					}
+				}
+				if(!varfound){
+					undeclared.add(child.toString());
+				}
+			}
+		}
+		return undeclared;
+	}
+	
+	private ReturnObject checkReturn(Node node){
+
+		int i=0;
+		boolean varfound = false;
+		for(Node child: node.getChildrenNodes()){
+			
+			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+				if(lastMethod.paramTable.containsKey(child.toString())){
+					if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
+
+						return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
+					}
+					varfound=true;
+				}
+				if(lastMethod.localVarTable.containsKey(child.toString())){
+					if(!lastMethod.localVarTable.get(child.toString()).equals(lastMethod.Type)){
+						return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
+					}
+					varfound=true;
+				}
+				if(!varfound){
+					return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
+				}
+			}
+			else if(child.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
+				for(Node child2: child.getChildrenNodes()){			
+					if(i==0){
+						if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+							if(lastMethod.paramTable.containsKey(child2.toString())){
+								if(!lastMethod.paramTable.get(child2.toString()).equals(lastMethod.Type)){
+									return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
+								}
+							}
+							if(lastMethod.localVarTable.containsKey(child2.toString())){
+								if(!lastMethod.localVarTable.get(child2.toString()).equals(lastMethod.Type)){	
+									return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
+								}
+							}
+						}
+					}
+					i++;
+				}
+			}
+		}
+		return null;
+		
+	}
+	
 	private void updateScopes(ArrayList<Object> ls){
 		if(ls.size()!=0)
 		lastScope=ls.get(ls.size()-1);
 	}
 
-
+	
 	public ReturnObject SemanticNodeCheck(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Object> ls) {
 		GraphNode nodeToSend = null;
 		updateScopes(ls);
@@ -359,67 +600,9 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			
-			//if not null, it's not an user defined method
-			if(((MethodCallExpr)node).getScope()==null){
-				boolean varfound=false;
-				boolean methodfound=false;
-				int nargs= 0;
-			    StringTokenizer stok = new StringTokenizer(node.toString(),"(");
-			    String methodName=stok.nextToken();
-			    System.out.println(methodName);
-			   
-			    //check if this method is defined and determine nr of args
-			    if(!lastClass.funcTable.containsKey(methodName))
-			    	for(int i = 0; i < scopes.size(); i++){
-					if(scopes.get(i).getClass()==ClassScope.class){
-						if(node.getChildrenNodes().get(0).equals(methodName))
-							methodfound=true;
-					}
-					
-				}
-			    else methodfound=true;
-			    if(!methodfound)
-			    	pendingMethodDeclarations.add(methodName);
-			    else{
-				//verify getArgs.size = method.ParamTable.size
-			   
-				System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
-				//TYPE CHECK EACH ARGUMENT 
-				//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
-				for(Node child: node.getChildrenNodes()){
-					
-					System.out.println("CHILD OF METHODCALL"+child.toString());
-					
-					//CHECK IF THE NAMEEXPRESSION IS IN THE LIST OF ARGUMENTS ,IF NOT IT IS THE SCOPE(class) OF THE FUNCTION 
-					if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-							/*if(lastScope.getClass()==MethodScope.class){
-								if(lastMethod.paramTable.containsKey(child.toString()))
-									varfound=true;
-								if(lastMethod.localVarTable.containsKey(child.toString()))
-									varfound=true;
-							}
-							if(lastScope.getClass()==LoopScope.class){
-								if(lastMethod.paramTable.containsKey(child.toString()))
-									varfound=true;
-								if(lastMethod.localVarTable.containsKey(child.toString()))
-									varfound=true;
-								if(lastLoop.localVarTable.containsKey(child.toString()))
-									varfound=true;
-							}
-							if(!varfound){
-								return "error:Variable with identifier "+child.toString()+" is undefined";
-							}
-						}*/
-					}
-					//TYPE CHECK A FIELD PASSED AS ARGUMENT, NO NEED TO SEE IF FIELD IS DEFINED
-					if(child.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
-						
-					}
-	
-				}
-		
-			    }
-			}
+			return processMethodCallNode(node);
+			
+			
 		}
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
 			//SCOPE will get me the class Scope of the fieldAccessExpr, check scopes != System 
@@ -428,85 +611,31 @@ public class SymbolTable {
 			//FIELD will get me the actual field
 			System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
 		}
+		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
-			boolean varfound=false;			
-			for(Node child: node.getChildrenNodes()){
-				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					
-					if(lastScope.getClass()==MethodScope.class){
-						if(lastMethod.paramTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastMethod.localVarTable.containsKey(child.toString()))
-							varfound=true;
-					}
-					
-					if(lastScope.getClass()==LoopScope.class){
-						System.out.println("DEBUG - " + child.toString());
-						
-						if(lastMethod.paramTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastMethod.localVarTable.containsKey(child.toString()))
-							varfound=true;
-						if(lastLoop.localVarTable.containsKey(child.toString()))
-							varfound=true;
-					}
-					
-					if(!varfound){
-						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
-					} else {
-						nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
-					}
-				
+			ArrayList<String> undeclared=new ArrayList<String>();
+			String returnstring = "error:Variables with identifiers:";
+			undeclared=assignExpressionCheck(node);
+			System.out.println(undeclared.toString());
+			if(undeclared.size()>0){
+				for(int i=0;i<undeclared.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(undeclared.get(i)+" ");
+					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
 				}
+				returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				return  new ReturnObject(returnstring);
+			} else {
+				nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 			}
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
 
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
-			
-			int i=0;
-			boolean varfound = false;
-			for(Node child: node.getChildrenNodes()){
-				
-				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-					if(lastMethod.paramTable.containsKey(child.toString())){
-						if(!lastMethod.paramTable.get(child.toString()).equals(lastMethod.Type)){
-
-							return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
-						}
-						varfound=true;
-					}
-					if(lastMethod.localVarTable.containsKey(child.toString())){
-						if(!lastMethod.localVarTable.get(child.toString()).equals(lastMethod.Type)){
-							return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
-						}
-						varfound=true;
-					}
-					if(!varfound){
-						return  new ReturnObject("error:Variable with identifier "+child.toString()+" is undefined");
-					}
-				}
-				else if(child.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){
-					for(Node child2: child.getChildrenNodes()){			
-						if(i==0){
-							if(child2.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-								if(lastMethod.paramTable.containsKey(child2.toString())){
-									if(!lastMethod.paramTable.get(child2.toString()).equals(lastMethod.Type)){
-										return  new ReturnObject("error:Type of return value -"+lastMethod.paramTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
-									}
-								}
-								if(lastMethod.localVarTable.containsKey(child2.toString())){
-									if(!lastMethod.localVarTable.get(child2.toString()).equals(lastMethod.Type)){	
-										return  new ReturnObject("error:Type of return value -"+lastMethod.localVarTable.get(child2.toString())+"- doesnt match method's: "+lastMethod.Name+" should return: "+lastMethod.Type+"");
-									}
-								}
-							}
-						}
-						i++;
-					}
-				}
-			}
+			ReturnObject returnObject = new ReturnObject("");
+			if((returnObject=checkReturn(node))!=null)
+				return returnObject;
 		}
 		return new ReturnObject(nodeToSend);
 	}

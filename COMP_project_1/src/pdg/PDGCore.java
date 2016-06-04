@@ -90,10 +90,18 @@ public class PDGCore {
     	}
     	
     	void printSemanticErrors() {
+    		ReturnObject ret = null;
     		//add undefined methods error
     		if(st.pendingMethodDeclarations.size()>0)
-    			for(String undeclaredMethod: st.pendingMethodDeclarations)
-    				errorlist.add("error:Undeclared Method "+undeclaredMethod+"");
+    			for(SymbolTable.Method undeclaredMethod: st.pendingMethodDeclarations)
+    				errorlist.add("error:Undeclared Method "+undeclaredMethod.methodName+" in class "+undeclaredMethod.methodScope+"");
+    		//check method calls that were pending
+    		for(int i=0;i<st.pendingMethodNodes.size();i++){
+    			ret=st.postProcessMethodCallNode(st.pendingMethodNodes.get(i).method,st.pendingMethodNodes.get(i).classScope,st.pendingMethodNodes.get(i).methodName);
+    			if(ret.hasError()) {	
+        			errorlist.add(ret.getError());
+        		}
+    		}
     		for(String error: errorlist){
 				System.out.println(error);
 			}	
