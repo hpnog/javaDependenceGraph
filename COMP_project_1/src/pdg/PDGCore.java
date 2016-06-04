@@ -17,6 +17,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import graphStructures.GraphNode;
 import graphStructures.RelationshipEdge;
 import graphStructures.ReturnObject;
+import graphStructures.VarChanges;
 
 public class PDGCore {
 	private static FileInputStream in;
@@ -43,6 +44,22 @@ public class PDGCore {
 		
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st = cv.st;
+		
+		///////////////////////////////
+		for(Scope scope : st.scopes) {
+			System.out.println("BEGIN SCOPE:" + scope.toString());
+			System.out.println("BEGIN ACCESS");
+			for(VarChanges vc : scope.varAccesses)
+				System.out.println(vc.getVar() + " |" + vc.getGraphNode().toString());
+			System.out.println("END ACCESS");
+			System.out.println("BEGIN CHANGES");
+			for(VarChanges vc : scope.varChanges)
+				System.out.println(vc.getVar() + " |" + vc.getGraphNode().toString());
+			System.out.println("END CHANGES");
+			System.out.println("END SCOPE:" + scope.toString());
+		}
+		///////////////////////////////
+		
 		st.addDependencies(hrefGraph);
 
 		st.printSymbolTable();

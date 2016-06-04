@@ -664,14 +664,32 @@ public class SymbolTable {
 			}
 
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
-			lastScope.varChanges.add(new VarChanges(nodeToSend, node.toString()));	
 		
-			for(Node child: node.getChildrenNodes())
-				if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-					for(Node childNode : node.getChildrenNodes()) {
+			int counter = 0;
+			for(Node child: node.getChildrenNodes()){
+				if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+
+					if(counter == 0)
+						lastScope.varChanges.add(new VarChanges(nodeToSend, child.toString(), false));
+					else
+						lastScope.varAccesses.add(new VarChanges(nodeToSend, child.toString(), false));
+					
+					String variable = child.toString();
+					for(int i1 = scopes.size() - 1; i1 >= 0; i1--) {
+						ArrayList<VarChanges> vc = scopes.get(i1).varChanges;
+						for(int j = 0; j < vc.size(); j++)
+							if(vc.get(j).getVar().equals(variable))
+								addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
+					}
+				}
+				else if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
+					for(Node childNode : child.getChildrenNodes()) {
 						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 
-							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
+							if(counter == 0)
+								lastScope.varChanges.add(new VarChanges(nodeToSend, childNode.toString(), false));
+							else
+								lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
 							
 							String variable = childNode.toString();
 							for(int i1 = scopes.size() - 1; i1 >= 0; i1--) {
@@ -682,10 +700,10 @@ public class SymbolTable {
 							}
 						}
 					}
-					nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 				}
-
+				counter++;
 			}
+		}
 			
 	
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
@@ -751,7 +769,7 @@ public class SymbolTable {
 		
 		return nodeToSend;
 	}
-
+	
 	public void addDependencies(DirectedGraph<GraphNode,RelationshipEdge> hrefGraph) {
 		for(Scope scope : scopes) {
 			if(scope instanceof LoopScope) {
