@@ -448,15 +448,13 @@ public class SymbolTable {
 		boolean varfound=false;
 		ArrayList<String> undeclared = new ArrayList<String>();
 		for(Node child: node.getChildrenNodes()){
-			System.out.println("CHILD OF ASSIGN"+child.toString()+child.getClass().toString());
 			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-				System.out.println("VARIABLE"+child.toString());
 				if(lastMethod.paramTable.containsKey(child.toString()))
 					varfound=true;
 				else if(lastMethod.localVarTable.containsKey(child.toString()))
 					varfound=true;
 				else for(int i=0;i<scopes.size();i++){
-					if(scopes.getClass().equals(LoopScope.class)){
+					if(scopes.get(i).getClass().equals(LoopScope.class)){
 						if (((LoopScope)scopes.get(i)).MethodName.equals(lastMethod.Name)){
 							if (((LoopScope)scopes.get(i)).ClassName.equals(lastClass.Name)){
 								if(((LoopScope)scopes.get(i)).localVarTable.containsKey(child.toString()))
@@ -685,7 +683,7 @@ public class SymbolTable {
 					nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, false);
 				}
 
-			}
+		}
 			
 	
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.ReturnStmt.class)){
