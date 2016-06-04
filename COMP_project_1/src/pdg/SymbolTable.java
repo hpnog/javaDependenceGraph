@@ -556,6 +556,22 @@ public class SymbolTable {
 		else if(node.getClass().equals(com.github.javaparser.ast.stmt.IfStmt.class)){
 			//INSERT GRAPH NODES
 		}
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.UnaryExpr.class)){
+			ArrayList<String> undeclared=new ArrayList<String>();
+			String returnstring = "error:Variables with identifiers:";
+			undeclared=assignBinaryExpressionCheck(node);
+			System.out.println(undeclared.toString());
+			if(undeclared.size()>0){
+				for(int i=0;i<undeclared.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(undeclared.get(i)+" ");
+					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+					returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				}
+
+				return  new ReturnObject(returnstring);
+			}
+		}
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){
 			ArrayList<String> undeclared=new ArrayList<String>();
 			String returnstring = "error:Variables with identifiers:";
