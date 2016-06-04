@@ -337,29 +337,7 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
-			loopScp.gn = nodeToSend;
-			loopScp.node = node;
-			
-			for(Node child : node.getChildrenNodes()) {
-				if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-					for(Node childNode : child.getChildrenNodes()) {
-						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-							String variable = childNode.toString();
-							
-							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
-							
-							for(int i = scopes.size() - 1; i >= 0; i--) {
-								ArrayList<VarChanges> vc = scopes.get(i).varChanges;
-								for(int j = 0; j < vc.size(); j++) {
-									if(vc.get(j).getVar().equals(variable)) {
-										addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.DoStmt.class)) {
@@ -368,29 +346,7 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
-			loopScp.gn = nodeToSend;
-			loopScp.node = node;
-			
-			for(Node child : node.getChildrenNodes()) {
-				if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-					for(Node childNode : child.getChildrenNodes()) {
-						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-
-							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
-							
-							String variable = childNode.toString();
-							for(int i = scopes.size() - 1; i >= 0; i--) {
-								ArrayList<VarChanges> vc = scopes.get(i).varChanges;
-								for(int j = 0; j < vc.size(); j++) {
-									if(vc.get(j).getVar().equals(variable)) {
-										addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
 		else if (node.getClass().equals(com.github.javaparser.ast.stmt.WhileStmt.class)) {
@@ -399,29 +355,7 @@ public class SymbolTable {
 			addLoopScope(loopScp, ls);
 			
 			nodeToSend = addNodeAndEdgeToGraph(node, hrefGraph, previousNode, true);
-			loopScp.gn = nodeToSend;
-			loopScp.node = node;
-			
-			for(Node child : node.getChildrenNodes()) {
-				if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-					for(Node childNode : child.getChildrenNodes()) {
-						if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-
-							lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
-							
-							String variable = childNode.toString();
-							for(int i = scopes.size() - 1; i >= 0; i--) {
-								ArrayList<VarChanges> vc = scopes.get(i).varChanges;
-								for(int j = 0; j < vc.size(); j++) {
-									if(vc.get(j).getVar().equals(variable)) {
-										addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+			analyseVariablesInLoop(node, hrefGraph, nodeToSend, loopScp);
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)){			
@@ -569,11 +503,9 @@ public class SymbolTable {
 							String variable = childNode.toString();
 							for(int i = scopes.size() - 1; i >= 0; i--) {
 								ArrayList<VarChanges> vc = scopes.get(i).varChanges;
-								for(int j = 0; j < vc.size(); j++) {
-									if(vc.get(j).getVar().equals(variable)) {
+								for(int j = 0; j < vc.size(); j++)
+									if(vc.get(j).getVar().equals(variable))
 										addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
-									}
-								}
 							}
 						}
 					}
@@ -631,6 +563,28 @@ public class SymbolTable {
 		return new ReturnObject(nodeToSend);
 	}
 
+	private void analyseVariablesInLoop(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
+			GraphNode nodeToSend, LoopScope loopScp) {
+		loopScp.gn = nodeToSend;
+		loopScp.node = node;
+		
+		for(Node child : node.getChildrenNodes())
+			if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)) 
+				for(Node childNode : child.getChildrenNodes())
+					if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+						
+						lastScope.varAccesses.add(new VarChanges(nodeToSend, childNode.toString(), false));
+						
+						String variable = childNode.toString();
+						for(int i = scopes.size() - 1; i >= 0; i--) {
+							ArrayList<VarChanges> vc = scopes.get(i).varChanges;
+							for(int j = 0; j < vc.size(); j++)
+								if(vc.get(j).getVar().equals(variable))
+									addEdgeBetweenNodes(vc.get(j).getGraphNode(),nodeToSend, "FDG", hrefGraph);
+						}
+					}
+	}
+
 	private void addEdgeBetweenNodes(GraphNode graphNode, GraphNode node, String string, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph) {
 		 try{
 				hrefGraph.addEdge(graphNode, node, new RelationshipEdge(string));
@@ -666,9 +620,9 @@ public class SymbolTable {
 		for(Scope scope : scopes) {
 			if(scope instanceof LoopScope) {
 				LoopScope ls = (LoopScope) scope;
-				for(Node child : (ls.node.getChildrenNodes())) {
-					if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){ 
-						for(Node childNode : child.getChildrenNodes()) {
+				for(Node child : (ls.node.getChildrenNodes())) 
+					if(child.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)) 
+						for(Node childNode : child.getChildrenNodes()) 
 							if(childNode.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){								
 								String variable = childNode.toString();
 								
@@ -678,16 +632,10 @@ public class SymbolTable {
 									}
 								}
 							}
-						}
-					}
-				}
-				for(VarChanges va : ls.varAccesses) {
-					for(VarChanges vc : ls.varChanges) {
-						if (va.getVar().equals(vc.getVar())) {
+				for(VarChanges va : ls.varAccesses) 
+					for(VarChanges vc : ls.varChanges) 
+						if (va.getVar().equals(vc.getVar())) 
 							addEdgeBetweenNodes(vc.getGraphNode(),va.getGraphNode(), "FDG", hrefGraph);
-						}
-					}
-				}
 			}
 		}
 	}
