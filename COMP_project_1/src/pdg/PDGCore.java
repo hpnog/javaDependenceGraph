@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
@@ -13,17 +12,20 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.ModifierSet;
-import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.mxgraph.view.mxGraph;
+
+import graphStructures.GraphNode;
+import graphStructures.RelationshipEdge;
+import graphStructures.ReturnObject;
 
 public class PDGCore {
 	private static FileInputStream in;
 	private SymbolTable st;
 	
+	
 	public PDGCore() {	}
 	
-	public void addFile(FileInputStream inArg, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode) throws ParseException, IOException {
+	public void addFile(FileInputStream inArg, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode) throws ParseException, IOException {
 		in = inArg;
 		CompilationUnit cu;
 		try {
@@ -35,12 +37,12 @@ public class PDGCore {
 		
 		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
 		CodeVisitor cv = new CodeVisitor();
+
 		cv.astPrint(cu);
-		cv.semanticAnalysis(cu);
-		cv.buildGraph(cu,hrefGraph,previousNode);
-		cv.st.printSymbolTable();
-		
-		
+		cv.semanticAnalysis(cu, hrefGraph, previousNode);
+		//cv.buildGraph(cu,hrefGraph,previousNode,st);
+		st = cv.st;
+		st.printSymbolTable();
 	}
 	
 }
@@ -60,16 +62,22 @@ public class PDGCore {
     	}
     	
     	//SEMANTIC ANALYSIS
-    	ArrayList<String> semanticAnalysis(Node node){
-    		String error;
+    	ArrayList<String> semanticAnalysis(Node node, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode){    		
+    		ReturnObject ret = null;
+    		GraphNode nextNode = previousNode;
     		
     		if(relevant(node)) {
-        		if((error=st.SemanticNodeCheck(node))!="clear") 		
-    			errorlist.add(error);
+    			ret = st.SemanticNodeCheck(node, hrefGraph, previousNode);
+        		if(ret.hasError()) {	
+        			errorlist.add(ret.getError());
+        		}
+        		else {
+        			nextNode = ret.getGraphNode();
+        		}
     		}
- 
+    		
     		for(Node child: node.getChildrenNodes()){
-    			semanticAnalysis(child);
+    			semanticAnalysis(child, hrefGraph, nextNode);
     		}
     		
     			
@@ -86,7 +94,7 @@ public class PDGCore {
 		}
     	
 		//GRAPH BUILDING
-    	boolean buildGraph(Node child2, DirectedGraph<String, DefaultEdge> hrefGraph, String previousNode){ 
+    	boolean buildGraph(Node child2, DirectedGraph<String, RelationshipEdge> hrefGraph, String previousNode, SymbolTable st){ 
     		//check for errors
     		if(errorlist.size()!=0){
     			printSemanticErrors();
@@ -97,7 +105,7 @@ public class PDGCore {
     		
     		if(relevant(child2)) {
     			
-    			if (child2.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)) {
+    			if (child2.getClass().equals(com.github.javaparser.ast.expr.MethodCallExpr.class)) {
     				hrefGraph.addVertex(child2.toString());
     				hrefGraph.addEdge(previousNode, child2.toString());
     				nextNode = child2.toString();
@@ -105,9 +113,8 @@ public class PDGCore {
     			
     		}	
     		
-    		
     		for(Node child: child2.getChildrenNodes()){
-      			if(!buildGraph(child, hrefGraph, nextNode))
+      			if(!buildGraph(child, hrefGraph, nextNode, st))
     				return false;
     		}
 			return true;
