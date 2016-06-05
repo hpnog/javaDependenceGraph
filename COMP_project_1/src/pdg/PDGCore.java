@@ -101,7 +101,8 @@ public class PDGCore {
     		return errorlist;
     	}
     	
-    	void printSemanticErrors(JTextArea textArea) {
+    	ArrayList<String> printSemanticErrors(JTextArea textArea) {
+    		
     		ReturnObject ret = null;
     		//add undefined methods error
     		if(st.pendingMethodDeclarations.size()>0)
@@ -109,7 +110,7 @@ public class PDGCore {
     				errorlist.add("error:Undeclared Method "+undeclaredMethod.methodName+" in class "+undeclaredMethod.methodScope+"");
     		//check method calls that were pending
     		for(int i=0;i<st.pendingMethodNodes.size();i++){
-    			ret=st.postProcessMethodCallNode(st.pendingMethodNodes.get(i).method,st.pendingMethodNodes.get(i).classScope,st.pendingMethodNodes.get(i).methodName);
+    			ret=st.postProcessMethodCallNode(st.pendingMethodNodes.get(i).method,st.pendingMethodNodes.get(i).classScope,st.pendingMethodNodes.get(i).methodName,st.pendingMethodNodes.get(i).callerMethod);
     			if(ret.hasError()) {	
         			errorlist.add(ret.getError());
         		}
@@ -118,10 +119,11 @@ public class PDGCore {
 
     		for(String error: errorlist){
     	    	textArea.setText(textArea.getText() + error + "\n");
-			}	
-    		
+			}	    		
 	    	textArea.setText(textArea.getText() + "Ended semantic errors\n");
-		}
+    		return errorlist;
+    	}
+    	
 		
 
 		

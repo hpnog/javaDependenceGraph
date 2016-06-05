@@ -34,14 +34,17 @@ public class SymbolTable {
 		Node method;
 		String classScope;
 		String methodName;
+		String 	callerMethod;
 		MethodNode(){
 			method=null;
 			classScope=null;
 		}
-		public MethodNode(Node node, String classScope2,String name) {
+		public MethodNode(Node node, String classScope2,String name,String caller) {
 			method=node;
 			classScope=classScope2;
 			methodName=name;
+			callerMethod=caller;
+		
 		}
 	
 	}
@@ -115,7 +118,7 @@ public class SymbolTable {
 
 	public void printSymbolTable(){ 
 		for(int i = 0; i < scopes.size(); i++){
-			System.out.println("SCOPE "+ scopes.get(i)+"\n");
+			System.out.println("SCOPE "+ scopes.get(i));
 			if(scopes.get(i).getClass()==ClassScope.class){
 				System.out.println(((ClassScope)scopes.get(i)).fieldTable.toString());	
 				System.out.println(((ClassScope)scopes.get(i)).funcTable.toString());
@@ -198,8 +201,8 @@ public class SymbolTable {
 				}
 	    }
 	}
-	private String verifyMethodArguments(Node node,Method method){
-		System.out.println((((MethodCallExpr)node).toString()));
+	
+	private String verifyMethodArguments(Node node,Method method,String callerMethod){
 		MethodScope methodscp=null;
 		//find MethodScope
 		for(int i=0;i<scopes.size();i++){
@@ -220,31 +223,60 @@ public class SymbolTable {
 		if(methodscp.paramTable.isEmpty())
 			if(!((MethodCallExpr)node).getArgs().isEmpty())
 				return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments("+((MethodCallExpr)node).getArgs().size()+" instead of 0)";
-			
-		   
-		System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
-		//TYPE CHECK EACH ARGUMENT 
-		//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
-		for(Node child: node.getChildrenNodes()){
-			
-			System.out.println("CHILD OF METHODCALL"+child.toString());
-			
-			//CHECK IF THE NAMEEXPRESSION IS IN THE LIST OF ARGUMENTS ,IF NOT IT IS THE SCOPE(class) OF THE FUNCTION 
-			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
 		
+		ArrayList<String> undeclared=new ArrayList<String>();
+	
+		for(Node child: node.getChildrenNodes()){
+			boolean varfound=false;
+			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
+				for(int i1=0;i1<scopes.size();i1++){
+					if(scopes.get(i1).getClass().equals(LoopScope.class)){
+						if (((LoopScope)scopes.get(i1)).MethodName.equals(callerMethod)){
+							if (((LoopScope)scopes.get(i1)).ClassName.equals(lastClass.Name)){
+								if(((LoopScope)scopes.get(i1)).localVarTable.containsKey(child.toString()))
+									System.out.println("PARENT " +node.getParentNode().toString());
+									varfound=true;
+							}
+						}
+					}
+					if(scopes.get(i1).getClass().equals(MethodScope.class)){
+						if(((MethodScope)scopes.get(i1)).Name.equals(callerMethod)){
+							if(((MethodScope)scopes.get(i1)).paramTable.containsKey(child.toString()))
+								varfound=true;
+							else if(((MethodScope)scopes.get(i1)).localVarTable.containsKey(child.toString()))
+								System.out.println("PARENT " +node.getParentNode().toString());
+								varfound=true;
+					
+						}
+					}
+				}
+				if(!varfound){
+					undeclared.add(child.toString());
+				}
 			}
-			//TYPE CHECK A FIELD PASSED AS ARGUMENT, NO NEED TO SEE IF FIELD IS DEFINED
-			if(child.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
-				
+		
+		}
+		
+		String returnstring = "error:Variables with identifiers:";
+		undeclared=assignBinaryExpressionCheck(node);
+		System.out.println(undeclared.toString());
+		if(undeclared.size()>0){
+			for(int i=0;i<undeclared.size();i++){
+				if(i==0)
+				returnstring  = returnstring.concat(undeclared.get(i)+" ");
+				else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+				returnstring = returnstring.concat("in Method:"+callerMethod+" are not declared");			
 			}
 
+			return returnstring;
 		}
 		return "clear";
 	}
-	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName){
+
+	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName,String callerMethod){
 			boolean methodfound=false;
 		   	Method method =new Method(methodName,scope);
-		    //check if this method is defined and determine nr of args
+		    //check if this method is defined
 		   	for(int i = 0; i < scopes.size(); i++){
 				if(scopes.get(i).getClass()==ClassScope.class){
 					if(((ClassScope)scopes.get(i)).Name.equals(scope))
@@ -258,7 +290,7 @@ public class SymbolTable {
 		    }
 		    else{
 		    	String returnval;
-		    	returnval=verifyMethodArguments(node, method);
+		    	returnval=verifyMethodArguments(node, method,callerMethod);
 		    	if(!returnval.equals("clear"))
 		    		return new ReturnObject(returnval);
 		    }
@@ -272,11 +304,8 @@ public class SymbolTable {
 			 	StringTokenizer stok = new StringTokenizer(node.toString(),".");
 			 	boolean methodfound=false;
 			 	String method="";
-			    while(stok.hasMoreTokens()){
 			    method=stok.nextToken();
-			    if(!stok.hasMoreTokens())
-			    break;
-			    }
+			    method=stok.nextToken();
 			    stok= new StringTokenizer(method,"(");
 			    method=stok.nextToken();
 			   //ignore system method Calls
@@ -296,11 +325,11 @@ public class SymbolTable {
 				    	}
 				    	if(!methodfound){
 				    		pendingMethodDeclarations.add(methodwithscope);
-				    		pendingMethodNodes.add(new MethodNode(node,classScope,method));
+				    		pendingMethodNodes.add(new MethodNode(node,classScope,method,lastMethod.Name));
 				    	}
 				    	else{
 				    		String returnval;
-					    	returnval=verifyMethodArguments(node, methodwithscope);
+					    	returnval=verifyMethodArguments(node, methodwithscope,lastMethod.Name);
 					    	if(!returnval.equals("clear"))
 					    		return new ReturnObject(returnval);
 				    	}
@@ -323,11 +352,11 @@ public class SymbolTable {
 		   
 		    if(!methodfound){
 		    	pendingMethodDeclarations.add(method);
-		    	pendingMethodNodes.add(new MethodNode(node,lastClass.Name,methodName));
+		    	pendingMethodNodes.add(new MethodNode(node,lastClass.Name,methodName,lastMethod.Name));
 		    }
 		    else{
 		    	String returnval;
-		    	returnval=verifyMethodArguments(node, method);
+		    	returnval=verifyMethodArguments(node, method,lastMethod.Name);
 		    	if(!returnval.equals("clear"))
 		    		return new ReturnObject(returnval);
 		    }
@@ -444,19 +473,19 @@ public class SymbolTable {
 		return false;
 	}
 	
-	private ArrayList<String> assignExpressionCheck(Node node){
+	private ArrayList<String> assignBinaryExpressionCheck(Node node){
 		boolean varfound=false;
 		ArrayList<String> undeclared = new ArrayList<String>();
 		for(Node child: node.getChildrenNodes()){
-			System.out.println("CHILD OF ASSIGN"+child.toString()+child.getClass().toString());
 			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-				System.out.println("VARIABLE"+child.toString());
 				if(lastMethod.paramTable.containsKey(child.toString()))
 					varfound=true;
 				else if(lastMethod.localVarTable.containsKey(child.toString()))
 					varfound=true;
-				else for(int i=0;i<scopes.size();i++){
-					if(scopes.getClass().equals(LoopScope.class)){
+				else if(lastClass.fieldTable.containsKey(child.toString()))
+					varfound=true;
+				for(int i=0;i<scopes.size();i++){
+					if(scopes.get(i).getClass().equals(LoopScope.class)){
 						if (((LoopScope)scopes.get(i)).MethodName.equals(lastMethod.Name)){
 							if (((LoopScope)scopes.get(i)).ClassName.equals(lastClass.Name)){
 								if(((LoopScope)scopes.get(i)).localVarTable.containsKey(child.toString()))
@@ -555,6 +584,41 @@ public class SymbolTable {
 				return  new ReturnObject("error:duplicated param identifier  : "+param.paramName+" in Method:"+lastMethod.Name+"");
 		}
 		
+		else if(node.getClass().equals(com.github.javaparser.ast.stmt.IfStmt.class)){
+			//INSERT GRAPH NODES
+		}
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.UnaryExpr.class)){
+			ArrayList<String> undeclared=new ArrayList<String>();
+			String returnstring = "error:Variables with identifiers:";
+			undeclared=assignBinaryExpressionCheck(node);
+			System.out.println(undeclared.toString());
+			if(undeclared.size()>0){
+				for(int i=0;i<undeclared.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(undeclared.get(i)+" ");
+					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+					returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				}
+
+				return  new ReturnObject(returnstring);
+			}
+		}
+		else if(node.getClass().equals(com.github.javaparser.ast.expr.BinaryExpr.class)){
+			ArrayList<String> undeclared=new ArrayList<String>();
+			String returnstring = "error:Variables with identifiers:";
+			undeclared=assignBinaryExpressionCheck(node);
+			System.out.println(undeclared.toString());
+			if(undeclared.size()>0){
+				for(int i=0;i<undeclared.size();i++){
+					if(i==0)
+					returnstring  = returnstring.concat(undeclared.get(i)+" ");
+					else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+					returnstring = returnstring.concat("in Method:"+lastMethod.Name+" are not declared");			
+				}
+
+				return  new ReturnObject(returnstring);
+			}
+		}
 		else if (node.getClass().equals(com.github.javaparser.ast.expr.VariableDeclarationExpr.class)) {
 			Variable var = new Variable();
 			ArrayList<Variable> repeatedOcc = new ArrayList<Variable>();
@@ -640,17 +704,26 @@ public class SymbolTable {
 		}
 				
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
-			//SCOPE will get me the class Scope of the fieldAccessExpr, check scopes != System 
-			//if SCOPE is this, get current class
-				System.out.println("SCOPE:"+((FieldAccessExpr) node).getScope().toString());
-			//FIELD will get me the actual field
-				System.out.println("FIELD:"+((FieldAccessExpr) node).getField().toString());
+		   String scope;		
+		   if(!((FieldAccessExpr) node).getScope().toString().startsWith("System")){
+			   if(((FieldAccessExpr) node).getScope().toString().startsWith("this"))
+			   scope=lastClass.Name;
+			   else scope=((FieldAccessExpr) node).getScope().toString();
+		   		for(int i = 0; i < scopes.size(); i++){
+		   			if(scopes.get(i).getClass()==ClassScope.class){
+		   				if(((ClassScope)scopes.get(i)).Name.equals(scope))
+		   					if(!((ClassScope)scopes.get(i)).fieldTable.containsKey(((FieldAccessExpr) node).getField()))
+		   						return new ReturnObject("error:Field with identifier "+((FieldAccessExpr) node).getField()+" in Method "+lastMethod.Name+" is not declared");
+							
+		   			}	
+		   		}
+		   }
 		}
 		
 		else if(node.getClass().equals(com.github.javaparser.ast.expr.AssignExpr.class)){			
 			ArrayList<String> undeclared=new ArrayList<String>();
 			String returnstring = "error:Variables with identifiers:";
-			undeclared=assignExpressionCheck(node);
+			undeclared=assignBinaryExpressionCheck(node);
 			System.out.println(undeclared.toString());
 			if(undeclared.size()>0){
 				for(int i=0;i<undeclared.size();i++){
