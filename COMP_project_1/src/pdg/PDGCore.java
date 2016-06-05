@@ -101,7 +101,7 @@ public class PDGCore {
     				errorlist.add("error:Undeclared Method "+undeclaredMethod.methodName+" in class "+undeclaredMethod.methodScope+"");
     		//check method calls that were pending
     		for(int i=0;i<st.pendingMethodNodes.size();i++){
-    			ret=st.postProcessMethodCallNode(st.pendingMethodNodes.get(i).method,st.pendingMethodNodes.get(i).classScope,st.pendingMethodNodes.get(i).methodName);
+    			ret=st.postProcessMethodCallNode(st.pendingMethodNodes.get(i).method,st.pendingMethodNodes.get(i).classScope,st.pendingMethodNodes.get(i).methodName,st.pendingMethodNodes.get(i).callerMethod);
     			if(ret.hasError()) {	
         			errorlist.add(ret.getError());
         		}

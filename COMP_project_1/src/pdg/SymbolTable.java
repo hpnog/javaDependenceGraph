@@ -34,14 +34,17 @@ public class SymbolTable {
 		Node method;
 		String classScope;
 		String methodName;
+		String 	callerMethod;
 		MethodNode(){
 			method=null;
 			classScope=null;
 		}
-		public MethodNode(Node node, String classScope2,String name) {
+		public MethodNode(Node node, String classScope2,String name,String caller) {
 			method=node;
 			classScope=classScope2;
 			methodName=name;
+			callerMethod=caller;
+		
 		}
 	
 	}
@@ -198,8 +201,8 @@ public class SymbolTable {
 				}
 	    }
 	}
-	private String verifyMethodArguments(Node node,Method method){
-		int nrargs=0;
+	
+	private String verifyMethodArguments(Node node,Method method,String callerMethod){
 		MethodScope methodscp=null;
 		//find MethodScope
 		for(int i=0;i<scopes.size();i++){
@@ -220,30 +223,57 @@ public class SymbolTable {
 		if(methodscp.paramTable.isEmpty())
 			if(!((MethodCallExpr)node).getArgs().isEmpty())
 				return "error:Method call of "+methodscp.Name+" in class "+methodscp.className+" has an invalid number of arguments("+((MethodCallExpr)node).getArgs().size()+" instead of 0)";
-			
-		if(!methodscp.paramTable.isEmpty())
-			nrargs=methodscp.paramTable.size();
 		
-		System.out.println("ARGS OF METHODCALL"+(((MethodCallExpr)node).getArgs().toString()));
-		//TYPE CHECK EACH ARGUMENT 
-		//CHECK IF ARGUMENT IS DEFINED(COULD BE FUNC PARAM,METHOD FROM CURRENTCLASS AND LOCALVAR)
+		ArrayList<String> undeclared=new ArrayList<String>();
+	
 		for(Node child: node.getChildrenNodes()){
-			
-			System.out.println("CHILD OF METHODCALL"+child.toString());
-			
-			//CHECK IF THE NAMEEXPRESSION IS IN THE LIST OF ARGUMENTS ,IF NOT IT IS THE SCOPE(class) OF THE FUNCTION 
+			boolean varfound=false;
 			if(child.getClass().equals(com.github.javaparser.ast.expr.NameExpr.class)){
-		
+				for(int i1=0;i1<scopes.size();i1++){
+					if(scopes.get(i1).getClass().equals(LoopScope.class)){
+						if (((LoopScope)scopes.get(i1)).MethodName.equals(callerMethod)){
+							if (((LoopScope)scopes.get(i1)).ClassName.equals(lastClass.Name)){
+								if(((LoopScope)scopes.get(i1)).localVarTable.containsKey(child.toString()))
+									System.out.println("PARENT " +node.getParentNode().toString());
+									varfound=true;
+							}
+						}
+					}
+					if(scopes.get(i1).getClass().equals(MethodScope.class)){
+						if(((MethodScope)scopes.get(i1)).Name.equals(callerMethod)){
+							if(((MethodScope)scopes.get(i1)).paramTable.containsKey(child.toString()))
+								varfound=true;
+							else if(((MethodScope)scopes.get(i1)).localVarTable.containsKey(child.toString()))
+								System.out.println("PARENT " +node.getParentNode().toString());
+								varfound=true;
+					
+						}
+					}
+				}
+				if(!varfound){
+					undeclared.add(child.toString());
+				}
 			}
-			//TYPE CHECK A FIELD PASSED AS ARGUMENT, NO NEED TO SEE IF FIELD IS DEFINED
-			if(child.getClass().equals(com.github.javaparser.ast.expr.FieldAccessExpr.class)){
-				
+		
+		}
+		
+		String returnstring = "error:Variables with identifiers:";
+		undeclared=assignBinaryExpressionCheck(node);
+		System.out.println(undeclared.toString());
+		if(undeclared.size()>0){
+			for(int i=0;i<undeclared.size();i++){
+				if(i==0)
+				returnstring  = returnstring.concat(undeclared.get(i)+" ");
+				else returnstring  = returnstring.concat("and " + undeclared.get(i))+ " ";
+				returnstring = returnstring.concat("in Method:"+callerMethod+" are not declared");			
 			}
 
+			return returnstring;
 		}
 		return "clear";
 	}
-	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName){
+
+	public ReturnObject postProcessMethodCallNode(Node node,String scope,String methodName,String callerMethod){
 			boolean methodfound=false;
 		   	Method method =new Method(methodName,scope);
 		    //check if this method is defined
@@ -260,7 +290,7 @@ public class SymbolTable {
 		    }
 		    else{
 		    	String returnval;
-		    	returnval=verifyMethodArguments(node, method);
+		    	returnval=verifyMethodArguments(node, method,callerMethod);
 		    	if(!returnval.equals("clear"))
 		    		return new ReturnObject(returnval);
 		    }
@@ -278,7 +308,6 @@ public class SymbolTable {
 			    method=stok.nextToken();
 			    stok= new StringTokenizer(method,"(");
 			    method=stok.nextToken();
-			    System.out.println("METHOD NAME IS"+method);
 			   //ignore system method Calls
 			   if(!((MethodCallExpr)node).getScope().toString().startsWith("System")){
 				   String classScope="";
@@ -296,11 +325,11 @@ public class SymbolTable {
 				    	}
 				    	if(!methodfound){
 				    		pendingMethodDeclarations.add(methodwithscope);
-				    		pendingMethodNodes.add(new MethodNode(node,classScope,method));
+				    		pendingMethodNodes.add(new MethodNode(node,classScope,method,lastMethod.Name));
 				    	}
 				    	else{
 				    		String returnval;
-					    	returnval=verifyMethodArguments(node, methodwithscope);
+					    	returnval=verifyMethodArguments(node, methodwithscope,lastMethod.Name);
 					    	if(!returnval.equals("clear"))
 					    		return new ReturnObject(returnval);
 				    	}
@@ -323,11 +352,11 @@ public class SymbolTable {
 		   
 		    if(!methodfound){
 		    	pendingMethodDeclarations.add(method);
-		    	pendingMethodNodes.add(new MethodNode(node,lastClass.Name,methodName));
+		    	pendingMethodNodes.add(new MethodNode(node,lastClass.Name,methodName,lastMethod.Name));
 		    }
 		    else{
 		    	String returnval;
-		    	returnval=verifyMethodArguments(node, method);
+		    	returnval=verifyMethodArguments(node, method,lastMethod.Name);
 		    	if(!returnval.equals("clear"))
 		    		return new ReturnObject(returnval);
 		    }
