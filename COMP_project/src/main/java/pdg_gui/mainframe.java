@@ -24,19 +24,36 @@ import java.io.*;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * The Class mainframe - Main GUI.
+ */
 public class mainframe extends JFrame {
 
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
+    /** The selected file. */
     private File selectedFile;
+    
+    /** The href graph. */
     @SuppressWarnings("rawtypes")
 	private DirectedGraph<GraphNode, RelationshipEdge> hrefGraph;
+    
+    /** The ast printer. */
     private PDGCore astPrinter = new PDGCore();
 
+    /** The panel. */
     private JPanel panel;
+    
+    /** The graph scroll. */
     private JScrollPane graphScroll;
+    
+    /** The console text. */
     private JTextArea consoleText;
 
+    /**
+     * Instantiates a new mainframe and initializes all the containers as well as their needed listeners.
+     */
     private mainframe() {
         final JFrame frame = new JFrame();
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
@@ -165,6 +182,11 @@ public class mainframe extends JFrame {
         frame.setVisible(true);
     }
 
+    /**
+     * The main method.
+     *
+     * @param args the arguments
+     */
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             new PDGCore();
@@ -177,18 +199,34 @@ public class mainframe extends JFrame {
         });
     }
 
+    /**
+     * Check if folder exists.
+     *
+     * @return true, if successful
+     */
     private boolean checkIfFolderExists() {
         File theDir = new File("dotOutputs");
         return !theDir.exists() && theDir.mkdir();
     }
 
+    /**
+     * Reset graph.
+     */
     private void resetGraph() {
     }
 
+    /**
+     * Creates the graph.
+     */
     private void createGraph() {
         hrefGraph = new DefaultDirectedGraph<>(RelationshipEdge.class);
     }
 
+    /**
+     * Gets the j graph.
+     *
+     * @return the j graph
+     */
     private JGraph getJGraph() {
         @SuppressWarnings("rawtypes")
 		ListenableGraph<GraphNode, RelationshipEdge> g = new ListenableDirectedGraph<>(hrefGraph);
@@ -218,6 +256,9 @@ public class mainframe extends JFrame {
         return jgraph;
     }
 
+    /**
+     * Update graph.
+     */
     private void updateGraph() {
         JGraph graph = getJGraph();
         graph.setAutoResizeGraph(true);
@@ -230,6 +271,9 @@ public class mainframe extends JFrame {
         panel.repaint();
     }
 
+    /**
+     * Run analysis and make graph.
+     */
     private void runAnalysisAndMakeGraph() {
         try {
             createGraph();

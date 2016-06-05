@@ -19,22 +19,58 @@ import graphStructures.RelationshipEdge;
 import graphStructures.ReturnObject;
 import graphStructures.VarChanges;
 
+/**
+ * The Class SymbolTable.
+ */
 class SymbolTable {
     //this array can accept any type of object, will contain classScope,GlobalScope,MethodScope and LoopScope var types
     //overall symbol tables can be accessed through here
+    /** The scopes. */
     private ArrayList<Scope> scopes = new ArrayList<>();
+    
+    /** The pending method declarations. */
     ArrayList<Method> pendingMethodDeclarations = new ArrayList<>();
+    
+    /** The pending method nodes. */
     ArrayList<MethodNode> pendingMethodNodes = new ArrayList<>();
+    
+    /** The last class. */
     private ClassScope lastClass = null;
+    
+    /** The last method. */
     private MethodScope lastMethod = null;
+    
+    /** The last loop. */
     private LoopScope lastLoop = null;
+    
+    /** The last scope. */
     private Scope lastScope = null;
+    
+    /**
+     * The Class MethodNode.
+     */
     class MethodNode{
+        
+        /** The method. */
         Node method;
+        
+        /** The class scope. */
         String classScope;
+        
+        /** The method name. */
         String methodName;
+        
+        /** The caller method. */
         String 	callerMethod;
 
+        /**
+         * Instantiates a new method node.
+         *
+         * @param node the node
+         * @param classScope2 the class scope2
+         * @param name the name
+         * @param caller the caller
+         */
         MethodNode(Node node, String classScope2, String name, String caller) {
             method=node;
             classScope=classScope2;
@@ -42,45 +78,112 @@ class SymbolTable {
             callerMethod=caller;
         }
     }
+    
+    /**
+     * The Class Method.
+     */
     class Method{
+        
+        /** The method name. */
         String methodName = null;
+        
+        /** The method scope. */
         String methodScope = null;
+        
+        /**
+         * Instantiates a new method.
+         *
+         * @param n the n
+         * @param s the s
+         */
         Method(String n, String s){
             methodName=n;
             methodScope=s;
         }
     }
+    
+    /**
+     * The Class Parameter.
+     */
     private class Parameter {
+        
+        /** The param name. */
         String paramName;
+        
+        /** The param type. */
         String paramType;
+        
+        /**
+         * Instantiates a new parameter.
+         */
         Parameter(){
             paramName = null;
             paramType = null;
         }
     }
+    
+    /**
+     * The Class Variable.
+     */
     private class Variable {
+        
+        /** The var name. */
         String varName;
+        
+        /** The var type. */
         String varType;
+        
+        /**
+         * Instantiates a new variable.
+         */
         Variable(){
             varName = null;
             varType = null;
         }
+        
+        /**
+         * Instantiates a new variable.
+         *
+         * @param name the name
+         * @param type the type
+         */
         Variable(String name, String type) {
             varName=name;
             varType=type;
         }
     }
+    
+    /**
+     * The Class Field.
+     */
     private class Field {
+        
+        /** The field name. */
         String fieldName;
+        
+        /** The field type. */
         String fieldType;
+        
+        /**
+         * Instantiates a new field.
+         */
         Field(){
             fieldName=null;
             fieldType=null;
         }
     }
 
+    /**
+     * Instantiates a new symbol table.
+     */
     SymbolTable(){}
 
+    /**
+     * Relevant.
+     *
+     * @param child2 the child2
+     * @return true, if successful
+     */
     private boolean relevant(Node child2) {
         return !child2.getClass().equals(com.github.javaparser.ast.body.VariableDeclarator.class) &&
                 !child2.getClass().equals(com.github.javaparser.ast.CompilationUnit.class) &&
@@ -90,6 +193,9 @@ class SymbolTable {
                 !child2.getClass().equals(com.github.javaparser.ast.type.ClassOrInterfaceType.class);
     }
 
+    /**
+     * Prints the symbol table.
+     */
     void printSymbolTable(){
         for (Scope scope : scopes) {
             System.out.println("SCOPE " + scope);
@@ -105,11 +211,24 @@ class SymbolTable {
         }
     }
 
+    /**
+     * Fill class scope.
+     *
+     * @param node the node
+     * @param classScp the class scope
+     */
     private void fillClassScope(Node node,ClassScope classScp){
         classScp.Name = ((ClassOrInterfaceDeclaration)node).getNameExpr().toString();
         classScp.Type=((ClassOrInterfaceDeclaration)node).getExtends().toString();
     }
 
+    /**
+     * Adds the class scope.
+     *
+     * @param cs the class scope
+     * @param ls the loop scope
+     * @return true, if successful
+     */
     private boolean addClassScope(ClassScope cs, ArrayList<Scope> ls){
         if(!scopes.contains(cs)){
             scopes.add(cs);
@@ -121,12 +240,24 @@ class SymbolTable {
         else return false;
     }
 
+    /**
+     * Fill loop scope.
+     *
+     * @param node the node
+     * @param loopScp the loop scope
+     */
     private void fillLoopScope(Node node,LoopScope loopScp){
         loopScp.ClassName = lastClass.Name;
         loopScp.MethodName = lastMethod.Name;
         loopScp.loopNode=node;
     }
 
+    /**
+     * Adds the loop scope.
+     *
+     * @param ls the loop scope
+     * @param ls1 the scope array
+     */
     private void addLoopScope(LoopScope ls, ArrayList<Scope> ls1){
         scopes.add(ls);
         ls1.add(ls);
@@ -134,6 +265,12 @@ class SymbolTable {
         lastScope = ls;
     }
 
+    /**
+     * Fill method scope.
+     *
+     * @param node the node
+     * @param methodScp the method scope
+     */
     private void fillMethodScope(Node node,MethodScope methodScp){
         methodScp.Type = ((MethodDeclaration)node).getType().toString();
         methodScp.Name = ((MethodDeclaration)node).getNameExpr().toString();
@@ -141,6 +278,13 @@ class SymbolTable {
         methodScp.methodNode = node;
     }
 
+    /**
+     * Adds the method scope.
+     *
+     * @param methodScp the method scope
+     * @param ls the scope array
+     * @return true, if successful
+     */
     private boolean addMethodScope(MethodScope methodScp, ArrayList<Scope> ls){
         if(!lastClass.funcTable.contains(methodScp.Name)){
             lastClass.funcTable.put(methodScp.Name, methodScp.Type);
@@ -153,6 +297,11 @@ class SymbolTable {
         return false;
     }
 
+    /**
+     * Check pending methods.
+     *
+     * @param methodScp the method scope
+     */
     private void checkPendingMethods(MethodScope methodScp){
         for(int i=0;i<pendingMethodDeclarations.size();i++){
             if(methodScp.className.equals(pendingMethodDeclarations.get(i).methodScope))
@@ -162,6 +311,14 @@ class SymbolTable {
         }
     }
 
+    /**
+     * Verify method arguments.
+     *
+     * @param node the node
+     * @param method the method
+     * @param callerMethod the caller method
+     * @return the string
+     */
     private String verifyMethodArguments(Node node,Method method,String callerMethod){
         MethodScope methodScp = null;
         //find MethodScope
@@ -232,6 +389,15 @@ class SymbolTable {
         return "clear";
     }
 
+    /**
+     * Post process method call node.
+     *
+     * @param node the node
+     * @param scope the scope
+     * @param methodName the method name
+     * @param callerMethod the caller method
+     * @return the return object
+     */
     ReturnObject postProcessMethodCallNode(Node node, String scope, String methodName, String callerMethod){
         boolean methodFound=false;
         Method method =new Method(methodName,scope);
@@ -255,6 +421,12 @@ class SymbolTable {
         return new ReturnObject("clear");
     }
 
+    /**
+     * Process method call node.
+     *
+     * @param node the node
+     * @return the return object
+     */
     private ReturnObject processMethodCallNode(Node node){
         if(((MethodCallExpr)node).getScope()!=null){
             StringTokenizer stock = new StringTokenizer(node.toString(),".");
@@ -300,7 +472,6 @@ class SymbolTable {
             String methodName=stock.nextToken();
             System.out.println(methodName);
             Method method =new Method(methodName,lastClass.Name);
-            //check if this method is defined and determine nr of args
             if(lastClass.funcTable.containsKey(methodName))
                 methodFound=true;
             if(!methodFound){
@@ -317,6 +488,13 @@ class SymbolTable {
         return new ReturnObject("clear");
     }
 
+    /**
+     * Adds the parameter.
+     *
+     * @param node the node
+     * @param param the param
+     * @return true, if successful
+     */
     private boolean addParameter(Node node,Parameter param){
         int i = 0;
         for(Node child: node.getChildrenNodes()){
@@ -336,6 +514,13 @@ class SymbolTable {
         return false;
     }
 
+    /**
+     * Adds the variable.
+     *
+     * @param node the node
+     * @param var the variable
+     * @return the array list
+     */
     private ArrayList<Variable> addVariable(Node node,Variable var){
         int i = 0;
         int c = 0;
@@ -370,6 +555,12 @@ class SymbolTable {
         return repeatedVars;
     }
 
+    /**
+     * Put variable.
+     *
+     * @param var the variable
+     * @return true, if successful
+     */
     private boolean putVariable(Variable var){
         if(lastScope.equals(lastMethod)){
             if(!lastMethod.localVarTable.containsKey(var.varName)){
@@ -386,6 +577,13 @@ class SymbolTable {
         return false;
     }
 
+    /**
+     * Adds the field.
+     *
+     * @param node the node
+     * @param fld the field
+     * @return true, if successful
+     */
     private boolean addField(Node node, Field fld){
         int i=0,c = 0;
         for(Node child: node.getChildrenNodes()){
@@ -409,6 +607,12 @@ class SymbolTable {
         return false;
     }
 
+    /**
+     * Assign binary expression check.
+     *
+     * @param node the node
+     * @return the array list
+     */
     private ArrayList<String> assignBinaryExpressionCheck(Node node){
         boolean varFound=false;
         ArrayList<String> undeclared = new ArrayList<>();
@@ -438,6 +642,12 @@ class SymbolTable {
         return undeclared;
     }
 
+    /**
+     * Check return.
+     *
+     * @param node the node
+     * @return the return object
+     */
     private ReturnObject checkReturn(Node node){
 
         int i=0;
@@ -484,11 +694,25 @@ class SymbolTable {
         return null;
     }
 
+    /**
+     * Update scopes.
+     *
+     * @param ls the scope array
+     */
     private void updateScopes(ArrayList<Scope> ls){
         if(ls.size()!=0)
             lastScope=ls.get(ls.size()-1);
     }
 
+    /**
+     * Semantic node check.
+     *
+     * @param node the node
+     * @param hrefGraph the href graph
+     * @param previousNode the previous node
+     * @param ls the scope array
+     * @return the return object
+     */
     ReturnObject SemanticNodeCheck(Node node, @SuppressWarnings("rawtypes") DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, ArrayList<Scope> ls) {
         GraphNode nodeToSend = null;
         updateScopes(ls);
@@ -748,6 +972,14 @@ class SymbolTable {
         return new ReturnObject(nodeToSend);
     }
 
+    /**
+     * Analyze variables in loop.
+     *
+     * @param node the node
+     * @param hrefGraph the href graph
+     * @param nodeToSend the node to send
+     * @param loopScp the loop scope
+     */
     private void analyseVariablesInLoop(Node node, @SuppressWarnings("rawtypes") DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
                                         GraphNode nodeToSend, LoopScope loopScp) {
         loopScp.gn = nodeToSend;
@@ -768,6 +1000,14 @@ class SymbolTable {
                     }
     }
 
+    /**
+     * Adds the edge between nodes.
+     *
+     * @param graphNode the graph node
+     * @param node the node
+     * @param string the string
+     * @param hrefGraph the href graph
+     */
     @SuppressWarnings("rawtypes")
 	private void addEdgeBetweenNodes(GraphNode graphNode, GraphNode node, String string, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph) {
         try{
@@ -778,6 +1018,15 @@ class SymbolTable {
         }
     }
 
+    /**
+     * Adds the node and edge to graph.
+     *
+     * @param node the node
+     * @param hrefGraph the href graph
+     * @param previousNode the previous node
+     * @param loop the loop
+     * @return the graph node
+     */
     private GraphNode addNodeAndEdgeToGraph(Node node, @SuppressWarnings("rawtypes") DirectedGraph<GraphNode, RelationshipEdge> hrefGraph,
                                             GraphNode previousNode, boolean loop) {
         GraphNode nodeToSend = null;
@@ -799,6 +1048,11 @@ class SymbolTable {
         return nodeToSend;
     }
 
+    /**
+     * Adds the dependencies.
+     *
+     * @param hrefGraph the href graph
+     */
     void addDependencies(@SuppressWarnings("rawtypes") DirectedGraph<GraphNode, RelationshipEdge> hrefGraph) {
         scopes.stream().filter(scope -> scope instanceof LoopScope).forEach(scope -> {
             LoopScope ls = (LoopScope) scope;

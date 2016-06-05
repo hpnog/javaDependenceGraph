@@ -18,10 +18,27 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * The Class PDGCore.
+ */
 public class PDGCore {
 
+	/**
+	 * Instantiates a new PDG core.
+	 */
 	public PDGCore() {	}
 	
+	/**
+	 * Adds the file.
+	 *
+	 * @param inArg the in FileInputStram
+	 * @param hrefGraph the href graph
+	 * @param previousNode the previous node
+	 * @param consoleText the console text
+	 * @return true, if successful
+	 * @throws ParseException the parse exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public boolean addFile(FileInputStream inArg, @SuppressWarnings("rawtypes") DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, JTextArea consoleText) throws ParseException, IOException {
 		CompilationUnit cu;
 		try {
