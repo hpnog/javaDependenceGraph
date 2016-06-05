@@ -26,6 +26,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.ListenableGraph;
@@ -65,6 +68,7 @@ public class mainframe extends JFrame {
 	private JPanel contentPane;
 	private JPanel panel;
 	private JScrollPane graphScroll;
+	private JTextArea consoleText;
 	
 
 	/**
@@ -116,6 +120,7 @@ public class mainframe extends JFrame {
 		txtrCodeGoesHere.setFont(new Font("Monospaced", Font.PLAIN, 11));
 		txtrCodeGoesHere.setEditable(false);
 		txtrCodeGoesHere.setBorder(codepanel.getBorder());
+				
 		JScrollPane scroll = new JScrollPane(txtrCodeGoesHere, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		scroll.setPreferredSize(new Dimension(300, 725));
 		codepanel.add(scroll);
@@ -141,16 +146,6 @@ public class mainframe extends JFrame {
 		JButton btnExportTodot = new JButton("Export to .dot file");
 		buttonsPane.add(btnExportTodot);
 		
-		JPanel varPane = new JPanel();
-		optionsPane.add(varPane, BorderLayout.WEST);
-		
-		JLabel label = new JLabel("Variable:");
-		varPane.add(label);
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		
-		JComboBox<Object> comboBox = new JComboBox<Object>();
-		varPane.add(comboBox);
-		
 		panel = new JPanel();
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		graphPane.add(panel);
@@ -162,16 +157,23 @@ public class mainframe extends JFrame {
 		
 		panel.add(graphScroll);
 		
+		JPanel console = new JPanel();
+		contentPane.add(console, BorderLayout.SOUTH);
+		console.setLayout(new BorderLayout(0, 0));
+		
+		consoleText = new JTextArea();
+		consoleText.setTabSize(2);
+		consoleText.setEditable(false);
+		consoleText.setBorder(codepanel.getBorder());
+		
+		JScrollPane consoleScroll = new JScrollPane(consoleText, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		consoleScroll.setPreferredSize(new Dimension(19, 200));
+		console.add(consoleScroll);
+				
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					createGraph();
-					GraphNode gn = new GraphNode(0, "Entry");
-					hrefGraph.addVertex(gn);
-					astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, gn);			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
-				} catch (ParseException | IOException e1) {	e1.printStackTrace();}
-		        				
-				updateGraph();
+				consoleText.setText("----------------------------------------------------\n");
+				runAnalysisAndMakeGraph();	
 			}
 		});
 		
@@ -201,12 +203,15 @@ public class mainframe extends JFrame {
 				try {
 					GraphNode.exporting = true;
 					String filename = JOptionPane.showInputDialog(frame, "What name do you want to give the file (must write .dot)?");
+					if(filename == null)
+						return;
 					out = new FileOutputStream("dotOutputs/" + filename);
 					DOTExporter<GraphNode, RelationshipEdge> exporter = new DOTExporter<GraphNode, RelationshipEdge>(
 							new StringNameProvider<GraphNode>(), null,
 							new StringEdgeNameProvider<RelationshipEdge>());
 					exporter.export(new OutputStreamWriter(out), hrefGraph);
 					out.close();
+					consoleText.setText(consoleText.getText() + "Exoprted Graph to *.dot file\n");
 					JOptionPane.showMessageDialog(frame, "File saved in 'dotOutpus' folder as " + filename);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -266,5 +271,15 @@ public class mainframe extends JFrame {
 		
 		panel.revalidate();
 		panel.repaint();
+	}
+	
+	private void runAnalysisAndMakeGraph() {
+		try {
+			createGraph();
+			GraphNode gn = new GraphNode(0, "Entry");
+			hrefGraph.addVertex(gn);
+			if(astprinter.addFile(new FileInputStream(selectedFile), hrefGraph, gn, consoleText))			// É PRECISO PASSAR AQUI O GRAFO PARA O PREENCHER PROVAVELMENTE
+				updateGraph();
+		} catch (ParseException | IOException e1) {	e1.printStackTrace();}
 	}
 }

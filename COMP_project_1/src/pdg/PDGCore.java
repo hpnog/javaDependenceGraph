@@ -3,6 +3,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JTextArea;
+
 import org.jgrapht.DirectedGraph;
 
 import com.github.javaparser.JavaParser;
@@ -26,14 +28,16 @@ public class PDGCore {
 	
 	public PDGCore() {	}
 	
-	public void addFile(FileInputStream inArg, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode) throws ParseException, IOException {
+	public boolean addFile(FileInputStream inArg, DirectedGraph<GraphNode, RelationshipEdge> hrefGraph, GraphNode previousNode, JTextArea consoleText) throws ParseException, IOException {
 		in = inArg;
-		CompilationUnit cu;
+		CompilationUnit cu = null;
 		try {
 		// parse the file
 			cu = JavaParser.parse(in);
-		} finally {
-		    in.close();
+			in.close();
+		} catch(Exception e) {
+			consoleText.setText(consoleText.getText() + "Syntatic Error - " + e.getMessage() + "\n");
+			return false;
 		}
 		
 		//new CodeVisitor().buildGraph(cu, hrefGraph, previousNode, st);
@@ -45,28 +49,16 @@ public class PDGCore {
 		//cv.buildGraph(cu,hrefGraph,previousNode,st);
 		st = cv.st;
 		
-		///////////////////////////////
-		for(Scope scope : st.scopes) {
-			System.out.println("BEGIN SCOPE:" + scope.toString());
-			System.out.println("BEGIN ACCESS");
-			for(VarChanges vc : scope.varAccesses)
-				System.out.println(vc.getVar() + " |" + vc.getGraphNode().toString());
-			System.out.println("END ACCESS");
-			System.out.println("BEGIN CHANGES");
-			for(VarChanges vc : scope.varChanges)
-				System.out.println(vc.getVar() + " |" + vc.getGraphNode().toString());
-			System.out.println("END CHANGES");
-			System.out.println("END SCOPE:" + scope.toString());
-		}
-		///////////////////////////////
-		
 		st.addDependencies(hrefGraph);
 
 		st.printSymbolTable();
 		//check for errors
 		if(cv.errorlist.size()!=0){
-			cv.printSemanticErrors();
+			cv.printSemanticErrors(consoleText);
+		} else {
+			consoleText.setText(consoleText.getText() + "No semantic errors were found\n");
 		}
+		return true;
 	}
 	
 }
@@ -109,7 +101,7 @@ public class PDGCore {
     		return errorlist;
     	}
     	
-    	void printSemanticErrors() {
+    	void printSemanticErrors(JTextArea textArea) {
     		ReturnObject ret = null;
     		//add undefined methods error
     		if(st.pendingMethodDeclarations.size()>0)
@@ -122,11 +114,14 @@ public class PDGCore {
         			errorlist.add(ret.getError());
         		}
     		}
+	    	textArea.setText(textArea.getText() + "Semantic errors:\n");
+
     		for(String error: errorlist){
-				System.out.println(error);
+    	    	textArea.setText(textArea.getText() + error + "\n");
 			}	
+    		
+	    	textArea.setText(textArea.getText() + "Ended semantic errors\n");
 		}
-    	
 		
 
 		
