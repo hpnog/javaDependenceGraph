@@ -160,8 +160,10 @@ public class mainframe extends JFrame {
                 checkIfFolderExists();
                 GraphNode.exporting = true;
                 String filename = JOptionPane.showInputDialog(frame, "What name do you want to give the file (must write .dot)?");
-                if (filename == null)
+                if (filename == null) {
+                    GraphNode.exporting = false;
                     return;
+                }
                 out = new FileOutputStream("dotOutputs/" + filename);
                 @SuppressWarnings("rawtypes")
 				DOTExporter<GraphNode, RelationshipEdge> exporter = new DOTExporter<>(
