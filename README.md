@@ -85,7 +85,7 @@ Each time a variable is accessed, it is stored in the actual scope's array and a
 
 #### CDG - Control Dependence Graph
 
-The **Control Dependence Graph** was filled in the order already provided by the AST. As said before, we use a recursive algorithm which allows us to fill this branch of the graph quite effectively whithout the need to create specific structures for its implementation.
+The **Control Dependence Graph** was filled in the order already provided by the AST. As said before, we use a recursive algorithm which allows us to fill this branch of the graph quite effectively without the need to create specific structures for its implementation.
 
 ## Overview
 
