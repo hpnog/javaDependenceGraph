@@ -9,7 +9,7 @@
 ## SUMMARY
 
 This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_ that can be outputed as a dot file. 
-It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a static **PDG**.
+It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a **PDG**.
 
 ### Feature Set:
 
