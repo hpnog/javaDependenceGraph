@@ -1,4 +1,4 @@
-Semantic Analysis
+# Semantic Analysis
 
 This test was specifically designed to showcase the semantic error reporting capabilities of our tool and as such it is filled with a wide array of those errors.
 
