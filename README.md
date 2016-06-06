@@ -8,15 +8,15 @@
 
 ## SUMMARY
 
-This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_. 
-It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a static **PDG**.
+This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_ that can be outputed as a dot file. 
+It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a **PDG**.
 
 ### Feature Set:
 
 * Syntactic checks of the given code(Error reporting through the GUI);
 * Semantic checks of the given code(Error reporting through the GUI);
-* Generation of a static Program Dependence Graph(Control Flow edges and Data Dependecy edges) for the entire file provided;
-* Exporting the generated graph into a dotfile format.
+* Generation of a Program Dependence Graph(Control Flow edges and Data Dependecy edges) for the entire file provided;
+* Exporting the generated graph into a dot file format.
 
 ## Syntactic Analysis
 
@@ -91,9 +91,10 @@ Overall we consider that all the group elements worked equally to the delivery o
 
 ## Pros
 
-* Our application helps the user understand what a **Program Dependence Graph** is and what it is supposed to represent. The fact that it shows the different edges as **Flow Dependencies** or **Control dependencies** allows us to understand the difference between the different graphs, and understand how all the variables, methods and classes works in Java. It has a complete syntactic and lexical analysis implemented with the parser and a semantic analysis done by us, covering all the major aspects of this language, if any error occurs in any of this analysis the user will be notified in the GUI.
+* Our application helps the user understand what a **Program Dependence Graph** is and what it is supposed to represent. The fact that it shows the different edges as **Flow Dependencies** or **Control dependencies** allows us to understand the difference between node interactions, and understand how all the variables, methods and classes works in Java. It has a complete syntactic and lexical analysis implemented with the parser and a semantic analysis done by us, covering all the major aspects of this language, if any error occurs in any of this analysis the user will be notified in the GUI.
 * The user-friendly GUI allows any user to use our application without any difficulty, regardless of the previous usage of the application.
 * The built-in console allows the user to quickly acknowledge what the errors are and where they are located.
+* In conclusion, a **Program Dependence Graph** has many uses in code analysis, particularly when it comes to its optimization.
 
 ## Cons
 
