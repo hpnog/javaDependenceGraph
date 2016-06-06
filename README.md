@@ -1,10 +1,15 @@
 # COMP - JAST2DyPDG
 
+### Class 3MIEIC01 - Group 4
+    Name: Francisco Pinho, Nr: 201303744, Grade: 17, Contribution: 25%
+    Name: Francisco Rodrigues, Nr: 201305627, Grade: 17, Contribution: 25%
+    Name: João Nogueira, Nr: 201303882, Grade: 17, Contribution: 25%
+    Name: Marta Lopes, Nr: 201208067, Grade: 17, Contribution: 25%
+
 ## SUMMARY
 
 This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_. 
-It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate
-representation of a static **PDG**.
+It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a static **PDG**.
 
 ### Feature Set:
 
