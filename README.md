@@ -79,16 +79,16 @@ These test files were specifically designed to test each feature and nuance of t
 
 Overall we consider that all the group elements worked equally to the delivery of this assignment:
 
-* Francisco Couto - GUI, AST, TableSymbol, Semantic (25% of Total Work);
+* Francisco Pinho - GUI, AST, TableSymbol, Semantic (25% of Total Work);
 * Francisco Rodrigues - Parser Interpretation, GUI, AST, Graph (25% of Total Work);
 * João Nogueira - AST, Graph, TableSymbol, Semantic (25% of Total Work);
 * Marta Lopes - Parser Interpretation, TableSymbol, Semantic, AST (25% of Total Work).
 
 ## Pros
 
-* Our application heps the user understand what a **Program Dependency Graph** is and what it is suposed to represent. The fact that it shows the different edges as **Flow Dependencies** or **Control dependencies** allows us to understand the difference between the different graphs.
-* The user-friendly GUI allows any user to use our application without any difficulty, regardless of the previous usage of the application;
-* The built-in console allows the user to quickly acknowledge what the errors are and wher they are located.
+* Our application helps the user understand what a **Program Dependency Graph** is and what it is supposed to represent. The fact that it shows the different edges as **Flow Dependencies** or **Control dependencies** allows us to understand the difference between the different graphs, and understand how all the variables, methods and classes works in Java. It has a complete sintatic and lexical analysis implemented with the parser and a semantic analysis done by us, covering all the major aspects of this language, if any error occurs in any of this analysis the user will be notified in the GUI.
+* The user-friendly GUI allows any user to use our application without any difficulty, regardless of the previous usage of the application.
+* The built-in console allows the user to quickly acknowledge what the errors are and where they are located.
 
 ## Cons
 
