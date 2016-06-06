@@ -1,4 +1,4 @@
-Syntatic Analysis
+# Syntatic Analysis
 
 This test was specifically designed to showcase the syntatic error reporting capabilities of our tool and as such it has a simple syntatic error.
 
