@@ -86,6 +86,9 @@ Overall we consider that all the group elements worked equally to the delivery o
 
 ## Pros
 
+* Our application heps the user understand what a **Program Dependency Graph** is and what it is suposed to represent. The fact that it shows the different edges as **Flow Dependencies** or **Control dependencies** allows us to understand the difference between the different graphs.
+* The user-friendly GUI allows any user to use our application without any difficulty, regardless of the previous usage of the application;
+* The built-in console allows the user to quickly acknowledge what the errors are and wher they are located.
 
 ## Cons
 
