@@ -1,4 +1,4 @@
-Nested Cycle Test
+# Nested Cycle Test
 
 This test was designed to show how our program outputs the graph of a Java file containing several cycles, nested or not.
 
