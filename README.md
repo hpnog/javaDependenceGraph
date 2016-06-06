@@ -79,10 +79,10 @@ These test files were specifically designed to test each feature and nuance of t
 
 Overall we consider that all the group elements worked equally to the delivery of this assignment:
 
-* Francisco Pinho - GUI, AST, TableSymbol, Semantic (25% of Total Work);
-* Francisco Rodrigues - Parser Interpretation, GUI, AST, Graph (25% of Total Work);
-* João Nogueira - AST, Graph, TableSymbol, Semantic (25% of Total Work);
-* Marta Lopes - Parser Interpretation, TableSymbol, Semantic, AST (25% of Total Work).
+* Francisco Pinho - GUI, AST, TableSymbol, Semantic;
+* Francisco Rodrigues - Parser Interpretation, GUI, AST, Graph;
+* João Nogueira - AST, Graph, TableSymbol, Semantic;
+* Marta Lopes - Parser Interpretation, TableSymbol, Semantic, AST.
 
 ## Pros
 
