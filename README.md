@@ -15,7 +15,7 @@ It's wrapped around an easy to use GUI for a better analysis of the code provide
 
 * Syntactic checks of the given code(Error reporting through the GUI);
 * Semantic checks of the given code(Error reporting through the GUI);
-* Generation of a static Program Dependence Graph(Control Flow edges and Data Dependecy edges) for the entire file provided;
+* Generation of a Program Dependence Graph(Control Flow edges and Data Dependecy edges) for the entire file provided;
 * Exporting the generated graph into a dotfile format.
 
 ## Syntactic Analysis
