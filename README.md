@@ -24,21 +24,6 @@ The analysis is performed by the _javaparser library_ used on this project. The 
 the first syntactic error and reported on the program's GUI. 
 The javaparser used provides an AST of the input code through the object CompilationUnit.
 
-## Symbol Table
-
-* ClassScopes	
- * Has hashtable for methods of a class with name(key) and their return type(value);
- * Has hashtable with fields;
- * Parameter for className;
-* MethodScopes
- * Has hashtable for parameters of each method name(key) and their type(value);
- * Has hashtable for localvariables of each method name(key) and their type(value);
- * Parameter for respective className, methodName and Type;
-* LoopScopes
- * Has hashtable for localvariables of each loop name(key) and their type(value);
- * Parameter for respective className and methodName;
-* Allows for multiple variable declarations in one statement(ex: String d,e,f,g;), they are all added to the Symbol Table.
-
 ## Semantic Analysis
 
 * Variable Declaration duplicates
@@ -66,14 +51,48 @@ The javaparser used provides an AST of the input code through the object Compila
 
 ## Intermidiate Representations (IRs)
 
-//FILL IN WITH GRAPH STUFF
+### Symbol Table
+
+* ClassScopes	
+ * Has hashtable for methods of a class with name(key) and their return type(value);
+ * Has hashtable with fields;
+ * Parameter for className;
+* MethodScopes
+ * Has hashtable for parameters of each method name(key) and their type(value);
+ * Has hashtable for localvariables of each method name(key) and their type(value);
+ * Parameter for respective className, methodName and Type;
+* LoopScopes
+ * Has hashtable for localvariables of each loop name(key) and their type(value);
+ * Parameter for respective className and methodName;
+* Allows for multiple variable declarations in one statement(ex: String d,e,f,g;), they are all added to the Symbol Table.
+
+### PDG - Program Dependence Graph
+
+To develop the graph in the Java application we decided to use a **DirectedGraph** object with edges with more information than the one allowed by the **DefaultEdge** class. Therefore we created a subclass called **RelationshipEdge**.
+
+To fill the graph with the needed information we took advantage of the semantic analysis algorithm. This algorithm goes through the AST to verify specific criteria spread throughout the nodes. As a result, the filling of the graph is mixed with the semantic analysis.
+
+#### FDG - Flow Depenence Graph
+
+To implement the **Flow Dependence Graph** we had to keep a record of all accesses and definitions of all variables. To do so, we had to create a superclass of all the scope classes (**LoopScope**, **ClassScope** and **MethodScope**) to guarantee that all Scopes have an **ArrayList** containing all the changed and accessed variables in its own Scope.
+```java
+class Scope {
+	ArrayList<VarChanges> varChanges = new ArrayList<>();
+	ArrayList<VarChanges> varAccesses = new ArrayList<>();
+}
+```
+Each time a variable is accessed, it is stored in the actual scope's array and a search is done through the scopes we're inside in the moment. When a definition is found a new edge is added. As the algorithm is recursive when a scope ends then the scope is no longer inside the **ArrayList**.
+
+#### CDG - Control Dependence Graph
+
+The **Control Dependence Graph** was filled in the order already provided by the AST. As said before, we use a recursive algorithm which allows us to fill this branch of the graph quite effectively whithout the need to create specific structures for its implementation.
 
 ## Overview
 
 For the syntactic analysis, an open source parser of Java was used as described above.
 Recursive algorithmns were used to process each node of the AST, branch by branch and to perform the construction of the Symbol Table, the semantic analysis and graph generation on a node by node basis.
 
-//Talk about the use of JGraphT
+To be able to display the graph we needed to convert our **DirectedGraph** to a **JGraphT**. To do so we had to override the **toString** and **equals** functions. It's override was also useful to export the graph into _.dot_ files as they do not accept some of the carracters displayed in the graph.
 
 ## TestSuite and Test Infrastructure
 
@@ -82,12 +101,14 @@ These test files were specifically designed to test each feature and nuance of t
 
 ## Task Distribution
 
-Overall we consider that all the group elements worked equally to the delivery of this assignment:
+Overall we consider that all the group elements worked equally to the delivery of this assignment.
 
-* Francisco Pinho - GUI, AST, TableSymbol, Semantic;
-* Francisco Rodrigues - Parser Interpretation, GUI, AST, Graph;
-* João Nogueira - AST, Graph, TableSymbol, Semantic;
-* Marta Lopes - Parser Interpretation, TableSymbol, Semantic, AST.
+* Francisco Pinho - Parser Interpretation, TableSymbol, Semantic;
+* Francisco Rodrigues - Parser Interpretation, AST, Graph;
+* João Nogueira - AST, Graph, Semantic;
+* Marta Lopes - AST, TableSymbol, Semantic.
+
+        NOTE: We consider that the GUI was developed by all members of the group.
 
 ## Pros
 
