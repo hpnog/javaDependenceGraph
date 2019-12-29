@@ -16,6 +16,8 @@ This will promp the project's GUI. For testing please choose the *.java files in
 This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_ that can be outputed as a dot file. 
 It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a **PDG**.
 
+This project was devemoped as a project for the Compiler course @ FEUP.
+
 ### Feature Set:
 
 * Syntactic checks of the given code(Error reporting through the GUI);
