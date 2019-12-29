@@ -1,12 +1,17 @@
-# COMP - JAST2DyPDG
+# javaDependenceGraph - JAST2DyPDG
 
-### Class 3MIEIC01 - Group 4
-    Name: Francisco Pinho, Nr: 201303744, Grade: 17, Contribution: 25%
-    Name: Francisco Rodrigues, Nr: 201305627, Grade: 17, Contribution: 25%
-    Name: João Nogueira, Nr: 201303882, Grade: 17, Contribution: 25%
-    Name: Marta Lopes, Nr: 201208067, Grade: 17, Contribution: 25%
+## Install & Run
 
-## SUMMARY
+In order to install and run this App make sure you have **jdk** and **maven** installed.
+
+```zsh
+cd COMP_project/
+mvn clean install
+mvn exec:java -Dexec.mainClass=pdg_gui.mainframe
+```
+This will promp the project's GUI. For testing please choose the *.java files in examples folder and "Call Graph", for instance.
+
+## Summary
 
 This tool is a **Program Dependence Graph** generator for a given input file in the programming language _Java_ that can be outputed as a dot file. 
 It's wrapped around an easy to use GUI for a better analysis of the code provided to the application through the intermediate representation of a **PDG**.
@@ -120,3 +125,10 @@ Overall we consider that all the group elements worked equally to the delivery o
 ## Cons
 
 The semantic analysis for the Java language is very complex, the error reporting is not very extensive as a result. The HashTable data structures used were a limitation when it came to the symbol table of method parameters, as type checking of arguments in a method call required an ordered set, this was only discovered very late into development and the amount of code restructuring needed was going to be too large to make the deadline, as a result type checking for method call arguments had to be scraped. 
+
+
+### Class 3MIEIC01 - Group 4
+    Name: Francisco Pinho, Nr: 201303744, Grade: 17, Contribution: 25%
+    Name: Francisco Rodrigues, Nr: 201305627, Grade: 17, Contribution: 25%
+    Name: João Nogueira, Nr: 201303882, Grade: 17, Contribution: 25%
+    Name: Marta Lopes, Nr: 201208067, Grade: 17, Contribution: 25%
